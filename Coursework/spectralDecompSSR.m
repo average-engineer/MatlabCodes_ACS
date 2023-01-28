@@ -12,12 +12,20 @@ function G = spectralDecompSSR(s,A,B,C,D)
 
 %% Formulating the Dyadic Expansion
 n = size(A,1); % # States in the system
-g = NaN(n,n,n);
+m = size(B,2); % # Inputs in the system
+l = size(C,1); % # Outputs in the system
+u = NaN(m,1,n);
+y = NaN(l,1,n);
+G = D;
 for ii = 1:n
-    g(:,:,ii) = right(:,ii)*(left(:,ii)');
-    g(:,:,ii) = g(:,:,ii)/(s - eigVals(ii,ii));
+    g = NaN;
+    u(:,:,ii) = B'*left(:,ii); % Input Pole Vector
+    y(:,:,ii) = C*right(:,ii); % Output Pole Vector
+    lMag(ii) = norm(left(:,ii),2); % Magnitude (2-Norm) of left eigenvectors
+    rMag(ii) = norm(right(:,ii),2); % Magnitude (2-Norm) of right eigenvectors
+    dot(ii) = left(:,ii)'*right(:,ii);
+    g = (y(:,:,ii)*u(:,:,ii)')/(s - eigVals(ii,ii));
+    G = G + g;
 end
 
-G = sum(g,3);
-G = C*G*B + D;
 end
