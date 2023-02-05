@@ -16,7 +16,9 @@ thetaMax = 3;
 % Time Constant
 tauMin = 2;
 tauMax = 3;
-% 
+
+% Selected Frequnecy
+omega = 0.2;
 %% Plant Family
 s = tf('s');
 
@@ -37,7 +39,7 @@ switch generation
                 end
             end
         end
-        point = 0.2*1i; % selected point
+        point = omega*1i; % selected point
         res = evalfr(Plants,point);
 
     case 'usample'
@@ -84,8 +86,8 @@ end
 
 %% Frequency Response
 figure
-hold on
 semilogx(freq,20*log10(radius),'color','b','linewidth',4)
+hold on
 for ii = 1:size(relError,1)
     semilogx(freq,20*log10(relError(ii,:)),'--','color','k')
 end
@@ -94,7 +96,7 @@ ylabel('Magnitude (dB)')
 title('Frequency Response')
 grid on
 legend('Relative Error Radius')
-axis([freq(1),freq(end),-60,30])
+%axis([freq(1),freq(end),-60,30])
 
 
 %% Determining complex weight
@@ -105,9 +107,21 @@ weight1 = (T*s + 0.2)/((T/2.5)*s + 1);
 % Second Order Weight
 weight2 = weight1*((s*s + 1.6*s + 1)/(s*s + 1.4*s + 1));
 
-% Weight obtained from FRD magnitude fitting of radius frequency response data
-radiusFRD = frd(radius,freq);
-weight3 = fitmagfrd(radiusFRD,2); % 2nd order weight
+% Weight obtained from the unmodelled dynamics strategy for multiplicative
+% uncertainty
+lowFreq = 0.01; % Selected low frequency
+ro = max(abs((evalfr(Plants,lowFreq*1i) - evalfr(Gnom,lowFreq*1i))/evalfr(Gnom,lowFreq*1i))); % Max relative uncertainty at low frequency
+highFreq = 100; % Selected high frequency
+rInf = max(abs((evalfr(Plants,highFreq*1i) - evalfr(Gnom,highFreq*1i))/evalfr(Gnom,highFreq*1i))); % Max relative uncertainty at high frequency
+
+for jj = 1:length(freq)
+    if abs(max(relError(:,jj)) - 1) < 0.01 
+        tt = 1/freq(jj); % Inverse of Frequency where relative uncertainty approaches 100%
+        break;
+    end
+end
+
+weight3 = (tt*s + ro)/((tt/rInf)*s + 1);
 
 for kk = 1:length(freq)
     wM1(kk) = evalfr(weight1,freq(kk));
@@ -117,8 +131,8 @@ end
 
 %% Comaprison of weights
 figure
-hold on
 semilogx(freq,20*log10(radius),'--','color','b','linewidth',4)
+hold on
 semilogx(freq,20*log10(wM1),'color','r','linewidth',4)
 semilogx(freq,20*log10(wM2),'color','g','linewidth',4)
 semilogx(freq,20*log10(wM3),'color','m','linewidth',4)
@@ -126,11 +140,10 @@ xlabel('Frequency (rad/s)')
 ylabel('Magnitude (dB)')
 title('Frequency Response')
 grid on
-legend('Relative Error Radius','First Order Weight','Second Order Weight','FRD Magntiude Fitted Weight')
-axis([0,10,-60,30])
+legend('Relative Error Radius','First Order Weight','Second Order Weight','Unmodelled Dynamics Weight')
+%axis([0,10,-60,30])
 
 %% Disc Uncertainty visualisation
-% Frequency : 0.2 rad/s
 figure
 hold on
 % Discs due to various multiplicative weights
@@ -147,3 +160,19 @@ ylabel('Im')
 title(append('Uncertainty Region at ',num2str(imag(point)),' rad/s'))
 legend('Disc Uncertainty (Weight 1)','Disc Uncertainty (Weight 2)','Disc Uncertainty (Weight 3)','Actual Uncertainty')
 
+%% Comparing choices of Nominal Models
+Gnom1 = (knom/(taunom*s + 1))*exp(-thetanom*s); % Mean Parameter Model
+Gnom2 = (knom/(taunom*s + 1)); % Low-order delay Free Model
+
+figure
+hold on
+disc1 = nsidedpoly(1000,'Center',[real(evalfr(Gnom1,point)),imag(evalfr(Gnom1,point))],'Radius',abs(evalfr(Gnom1*weight2,point)));
+disc2 = nsidedpoly(1000,'Center',[real(evalfr(Gnom2,point)),imag(evalfr(Gnom2,point))],'Radius',abs(evalfr(Gnom2*weight2,point)));
+plot(disc1,'EdgeColor','r','FaceColor','r')
+plot(disc2,'EdgeColor','g','FaceColor','g')
+plot(evalfr(Plants,point),'*') % Actual Uncertainty Region
+grid on
+xlabel('Re')
+ylabel('Im')
+title(append('Uncertainty Region at ',num2str(imag(point)),' rad/s'))
+legend('Disc Uncertainty (Mean Parameter Nominal Model)','Disc Uncertainty (Low-order Delay Free Nominal Model)','Actual Uncertainty')
