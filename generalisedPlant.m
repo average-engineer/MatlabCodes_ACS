@@ -11,7 +11,7 @@ G = 1/(10*s + 1);
 systemnames = 'G'; % Plant Model
 inputvar = '[d;r;n;u]'; % Exogeneous Inputs and Control Signals
 input_to_G = '[u]'; % Controller Signal
-outputvar = '[G + d + r ; r - G - d - n]'; % Exogeneous and Sensed Outputs
+outputvar = '[G + d + r ; r - G - d - n]'; % Exogeneous and Sensed Outputs (as a function of all inputs)
 sysoutname = 'P';
 P = sysic;
 
