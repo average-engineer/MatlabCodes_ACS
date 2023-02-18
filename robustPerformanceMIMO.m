@@ -64,7 +64,7 @@ end
 BlockStructure1 = [1,0;1,0;2,2];
 
 % Perturbation Structure 2
-% Perturbation Block 1: Full Complex Matrix Perturbation of 2x
+% Perturbation Block 1: Full Complex Matrix Perturbation of 2x2
 % Perturbation Block 2: Peformance Full Complex Matrix Perturbation of 2x2
 BlockStructure2 = [2,2;2,2];
 
