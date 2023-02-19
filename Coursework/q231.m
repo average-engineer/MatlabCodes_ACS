@@ -4,7 +4,7 @@ close all
 clc
 format short
 s = tf('s');
-freq = logspace(-2,3,100);
+freq = logspace(-3,3,100);
 fall = 1;
 %% Verifying the model for parametric uncertainties
 mnom = 10;
@@ -46,9 +46,8 @@ W2 = tf([0.7 1],[0.07 1]); % Actuator Effort Weight
 W2 = 0.3*W2;
 %% PI Controller Design for Nominal System
 K0 = 10*tf([10 1],[10 0]); % Lag Compensator
-K1 = tf([1 0.1],[1 5.77]); % Lead Compensator
-K = K1*K0;
-Lnom = minreal(W1*hnom*W2*K*tf(1,[mnom cnom knom]));
+K = W2*K0; % W2 acting as a Lead Compensator
+Lnom = minreal(W1*hnom*K*tf(1,[mnom cnom knom]));
 switch fall
     case 1
 
@@ -74,17 +73,41 @@ switch fall
         grid on
 
         %% Manually Obtained Generalized Plant
-        P = [-bm/mnom,-1,-(bk - knom*dk),0,-knom,-cnom,0,W2;zeros(1,5),rc*cnom,0,0;...
-            0,0,-dk,0,1,zeros(1,3);zeros(1,3),-dh,1,zeros(1,3);zeros(1,5),1,0,0;...
-            (dm/mnom) - (bm/(mnom^2)),-1/mnom,-(bk-knom*dk)/mnom,0,-knom/mnom,-cnom/mnom,0,W2/mnom;...
-            zeros(1,3),W1*(bh-hnom*dh),W1*hnom,0,W1,0;zeros(1,3),-W1*(bh-hnom*dh),-W1*hnom,0,-W1,0];
+        P = [-bm/mnom,-1,-(bk - knom*dk),0,-knom,-cnom,0,1;
+            zeros(1,5),rc*cnom,0,0;
+            0,0,-dk,0,1,zeros(1,3);
+            zeros(1,3),-dh,1,zeros(1,3);
+            zeros(1,5),1,0,0;
+            (dm/mnom) - (bm/(mnom^2)),-1/mnom,-(bk-knom*dk)/mnom,0,-knom/mnom,-cnom/mnom,0,1/mnom;
+            zeros(1,3),W1*(bh-hnom*dh),W1*hnom,0,W1,0;
+            zeros(1,3),-W1*(bh-hnom*dh),-W1*hnom,0,-W1,0];
         %% Closing the Lower Controller Loop
-        N = lft(P,K);
         P11 = P(1:7,1:7);
         P12 = P(1:7,8);
         P21 = P(8,1:7);
         P22 = P(8,8);
+        % N = P11 + P12*K*inv(eye(size(P22*K)) - P22*K)*P21;
+        N = lft(P,K);
         M = minreal(N(1:4,1:4));
+
+        %% Using Robust Control Toolbox
+        % Uncertain Closed Loop
+        Lp = W1*hp*K*tf(1,[mp cp kp]);
+        clTFp = uss(W1/(1 + Lp));
+        % Uncertain State Space (Open Loop)
+        Aol = [0,1;-kp/mp,-cp/mp];
+        Bol = [0;1/mp];
+        Col = [hp,0];
+        Dol = 0;
+        % Uncertain State Space (Closed Loop)
+        Acl = Aol - Bol*K*W1*[hp,0];
+        Bcl = -Bol*K*W1;
+        Ccl = [W1*hp,0];
+        Dcl = W1;
+        CLsys = ss(Acl,Bcl,Ccl,Dcl);
+        [N1,delta] = lftdata(CLsys);
+        N1 = minreal(tf(N1));
+        M1 = N1(1:size(delta,1),1:size(delta,1));
 
         %% Robust Stability
         % Perturbation Block Structure
@@ -93,35 +116,30 @@ switch fall
         for kk = 1:length(freq)
             % Using upper singular value
             [~,ee,~] = svd(evalfr(M,freq(kk)*1i));
+            [~,ee1,~] = svd(evalfr(M1,freq(kk)*1i));
             MSVFR(kk) = ee(1,1);
+            M1SVFR(kk) = ee1(1,1);
             % Using Structure Singular Value
             bounds = mussv(evalfr(M,freq(kk)*1i),BlockStructure);
             MSSVFR(kk) = max(bounds); % Using the upper bound (more reliable due to convex optimization)
+            bounds1 = mussv(evalfr(M1,freq(kk)*1i),BlockStructure);
+            M1SSVFR(kk) = max(bounds1); % Using the upper bound (more reliable due to convex optimization)
         end
 
         figure
-        semilogx(freq,MSVFR,'--','color','k','DisplayName','Upper Singular Value (M)')
+        semilogx(freq,MSVFR,'--','color','k','linewidth',2,'DisplayName','Upper Singular Value (M)')
+        hold on
+        semilogx(freq,M1SVFR,'color','r','DisplayName','Upper Singular Value (M1)')
         xlabel('Frequency (rad/s)')
         grid on
         legend
         figure
-        semilogx(freq,MSSVFR,'--','color','r','DisplayName','Structured Singular Value (M)')
+        semilogx(freq,MSSVFR,'--','color','k','linewidth',2,'DisplayName','Structured Singular Value (M)')
+        hold on
+        semilogx(freq,M1SSVFR,'color','r','DisplayName','Structured Singular Value (M1)')
         xlabel('Frequency (rad/s)')
         grid on
         legend
-
-        %% Using Robust Control Toolbox
-        % Uncertain Closed Loop
-        Lp = W1*hp*W2*K*tf(1,[mp cp kp]);
-        clTFp = uss(W1/(1 + Lp));
-        opts = robOptions('VaryFrequency','on');
-        [margins,wc,info] = robstab(clTFp,{freq(1),freq(end)});
-        figure
-        semilogx(info.Frequency,info.Bounds)
-        title('Stability Margin vs. Frequency')
-        ylabel('Margin')
-        xlabel('Frequency')
-        legend('Lower bound','Upper bound')
 
         %% Nominal Performance
         N22 = minreal(N(end-2:end,end-2:end));

@@ -4,21 +4,20 @@ close all
 clc
 format short
 s = tf('s');
+freq = logspace(-3,3,500);
 %% Plant
 G = [7,8;6,7]*[1/(s+1),0;0,2/(s+2)]*inv([7,8;6,7]);
 %% Controller
 K = -eye(size(G));
 LI = K*G;
 L = G*K;
-olTF = eye(size(G)) - L;
-detTF = (olTF(1,1)*olTF(2,2) - olTF(1,2)*olTF(2,1));
 %% Closed Loop TFs
 Tf1 = minreal(inv(eye(size(G)) - (K*G)));
 Tf2 = minreal(K*inv(eye(size(G)) - (G*K)));
 Tf3 = minreal(G*Tf1);
 Tf4 = minreal(inv(eye(size(G)) - (G*K)));
 %% Question Part
-part = 'b';
+part = 'c';
 switch part
     case 'a'
         %% Pole Zero Map
@@ -76,13 +75,57 @@ switch part
         legend
 
     case 'b'
-        freq = logspace(-3,2,100);
-        MIDM = diskmargin(G*K);
+        
+        %% Additive Dynamic Uncertainty
+        % M Matrix
+        MA = minreal(K*inv(eye(size(G)) - G*K));
+
+        %% Multiplicative Output Dynamic Uncertainty
+        % M Matrix
+        MM = minreal(G*K*inv(eye(size(G)) - G*K));
+
+        %% Upper Singular Value Frequency Response
+        for kk = 1:length(freq)
+            % Additive Uncertainty Singular Value
+            [~,eeA,~] = svd(evalfr(MA,freq(kk)*1i));
+            MAFR(kk) = eeA(1,1);
+            % Multiplicative Uncertainty Singular Value
+            [~,eeM,~] = svd(evalfr(MM,freq(kk)*1i));
+            MMFR(kk) = eeM(1,1);
+        end
+
+        % Computing the frequency at which Peak is reached
+        [HInfNormA,peakFreqA] = hinfnorm(MA);
+        [HInfNormM,peakFreqM] = hinfnorm(MM);
+
+        figure
+        semilogx(freq,MAFR,'-*','DisplayName','Additive Uncertainty')
+        hold on
+        semilogx(freq,MMFR,'-*','DisplayName','Output Multiplicative Uncertainty')
+        grid on
+        xlabel('Frequency (rad/s)')
+        title('Singular Value Plot')
+        legend 
+        display(append("H-Inf Norm of MM is ",num2str(hinfnorm(MM))));
+        display(append("H-Inf Norm of MA is ",num2str(hinfnorm(MA))));
+
+    case 'c'
+        MA = minreal(K*inv(eye(size(G)) - G*K));
+        MM = minreal(G*K*inv(eye(size(G)) - G*K));
+        gamma = 0.06; % Worst Case Perturbation
+        critFreq = 2.83; % Critical Frequency (rad/s) at which worst case perturbation occurs
+        %% Lower Singular Value of Perturbation Matrix at critical frequency
+        for kk = 1:length(freq)
+            [~,eeA,~] = svd(evalfr(MA,freq(kk)*1i));
+            lowMA(kk) = eeA(end,end);
+            [~,eeM,~] = svd(evalfr(MM,freq(kk)*1i));
+            lowMM(kk) = eeM(end,end);
+        end
+        %% Perturbation Matrix
 
         
+
        
-         
-        
         
 end
 
