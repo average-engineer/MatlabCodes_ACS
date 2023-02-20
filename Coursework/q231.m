@@ -80,7 +80,7 @@ switch fall
             zeros(1,5),1,0,0;
             (dm/mnom) - (bm/(mnom^2)),-1/mnom,-(bk-knom*dk)/mnom,0,-knom/mnom,-cnom/mnom,0,1/mnom;
             zeros(1,3),W1*(bh-hnom*dh),W1*hnom,0,W1,0;
-            zeros(1,3),-W1*(bh-hnom*dh),-W1*hnom,0,-W1,0];
+            zeros(1,3),-1*(bh-hnom*dh),-1*hnom,0,-1,0];
         %% Closing the Lower Controller Loop
         P11 = P(1:7,1:7);
         P12 = P(1:7,8);
@@ -92,20 +92,9 @@ switch fall
 
         %% Using Robust Control Toolbox
         % Uncertain Closed Loop
-        Lp = W1*hp*K*tf(1,[mp cp kp]);
-        clTFp = uss(W1/(1 + Lp));
-        % Uncertain State Space (Open Loop)
-        Aol = [0,1;-kp/mp,-cp/mp];
-        Bol = [0;1/mp];
-        Col = [hp,0];
-        Dol = 0;
-        % Uncertain State Space (Closed Loop)
-        Acl = Aol - Bol*K*W1*[hp,0];
-        Bcl = -Bol*K*W1;
-        Ccl = [W1*hp,0];
-        Dcl = W1;
-        CLsys = ss(Acl,Bcl,Ccl,Dcl);
-        [N1,delta] = lftdata(CLsys);
+        Lp = 1*hp*K*tf(1,[mp cp kp]);
+        clTFp = uss(1/(1 + Lp));
+        [N1,delta] = lftdata(clTFp);
         N1 = minreal(tf(N1));
         M1 = N1(1:size(delta,1),1:size(delta,1));
 
@@ -127,7 +116,7 @@ switch fall
         end
 
         figure
-        semilogx(freq,MSVFR,'--','color','k','linewidth',2,'DisplayName','Upper Singular Value (M)')
+        %semilogx(freq,MSVFR,'--','color','k','linewidth',2,'DisplayName','Upper Singular Value (M)')
         hold on
         semilogx(freq,M1SVFR,'color','r','DisplayName','Upper Singular Value (M1)')
         xlabel('Frequency (rad/s)')
