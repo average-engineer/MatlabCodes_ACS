@@ -2,7 +2,7 @@
 clearvars
 close all
 clc
-format short
+format long
 %% Linearized Dynamics
 ag = [-2.2567e-02  -3.6617e+01  -1.8897e+01  -3.2090e+01   3.2509e+00  -7.6257e-01
        9.2572e-05  -1.8997e+00   9.8312e-01  -7.2562e-04  -1.7080e-01  -4.9652e-03
@@ -37,7 +37,7 @@ end
 
 %% F matrix
 % Af = A + B*F needs to be stable
-desEigs = [-1,-1,-0.5,-0.5]'; % Desired eigenvalues of Af
+desEigs = [-1,-1,-2,-2]'; % Desired eigenvalues of Af
 F = place(sys_red.A,-sys_red.B,desEigs);
 Af = sys_red.A + sys_red.B*F;
 Cf = sys_red.C + sys_red.D*F;
@@ -52,10 +52,10 @@ M = tf(ss(Af,sys_red.B,F,eye(m,m)));
 X = tf(ss(Af,-H,Cf,eye(m,m)));
 Y = tf(ss(Af,-H,F,zeros(m,m)));
 
-Ntilda = minreal(tf(ss(Ah,Bh,sys_red.C,sys_red.D)));
-Mtilda = minreal(tf(ss(Ah,H,sys_red.C,eye(m,m))));
-Xtilda = minreal(tf(ss(Ah,-Bh,F,eye(m,m))));
-Ytilda = minreal(tf(ss(Ah,-H,F,zeros(m,m))));
+Ntilda = tf(ss(Ah,Bh,sys_red.C,sys_red.D));
+Mtilda = tf(ss(Ah,H,sys_red.C,eye(m,m)));
+Xtilda = tf(ss(Ah,-Bh,F,eye(m,m)));
+Ytilda = tf(ss(Ah,-H,F,zeros(m,m)));
 %% Verifying
 ver = [Xtilda,-Ytilda;-Ntilda,Mtilda]*[M,Y;N,X];
 freq = logspace(-2,3,100);
@@ -64,70 +64,80 @@ for kk = 1:length(freq)
 end
 %% Youla Controller 
 % Q = [tf(1,[1,2]),-tf(2,[1,2]);-tf(2,[1,2]),tf(2,[1,3])]; % Stable, real-rational proper TF
-% Q = [tf(1,[1,1]),0;0,tf(1,[1,1])];
-Q = tf(1,[1 8 15])*eye(size(Gred));
+Q = [tf(1,[1,1]),0;0,tf(1,[1,1])];
+% Q = tf(1,[1 8 15])*eye(size(Gred));
 K = (Y - M*Q)*inv(X - N*Q);
 % K = inv(Xtilda-Q*Ntilda)*(Ytilda-Q*Mtilda);
 K = minreal(K);
 %% Closed Loop Transfer Functions
-% L = Gred*K; % Open-Loop Transfer Function
-% S = inv(eye(size(L)) + L); % Senstivity TF 
-% T = S*L; % Complimentary Senstitvity TF
-% T = minreal(T);
-% S = minreal(S);
-Tf1 = minreal(inv(eye(size(Gred)) - (K*Gred)));
-Tf2 = minreal(K*inv(eye(size(Gred)) - (Gred*K)));
-Tf3 = minreal(Gred*Tf1);
-Tf4 = minreal(inv(eye(size(Gred)) - (Gred*K)));
+G = N*inv(M);
+L = G*K;
+% S = inv(eye(size(L)) - L);
+S = Mtilda*(X-Ntilda*Q);
+T = Ntilda*(Mtilda*Q-Y);
 %% Closed Loop Time Response
-%% Arbritary Input
+% P-Z Map for S and T
+figure
+subplot(2,1,1)
+pzmap(S)
+grid on
+title('S')
+subplot(2,1,2)
+pzmap(T)
+grid on
+title('T')
+
+% Step Response
+figure
+step(S)
+grid on
+title('S')
+
+figure
+step(T)
+grid on
+title('T')
+
+% Arbritary Input
 t = linspace(0,10,100);
 u1 = 2.*exp(-t);
 u2 = zeros(size(t));
 u = [u1;u2];
 figure
-subplot(2,2,1)
-y1 = lsimplot(Tf1,u,t);
+subplot(2,1,1)
+y1 = lsimplot(S,u,t);
 grid on
-title('Tf1')
-subplot(2,2,2)
-y2 = lsimplot(Tf2,u,t);
+title('S')
+subplot(2,1,2)
+y2 = lsimplot(T,u,t);
 grid on
-title('Tf2')
-subplot(2,2,3)
-y3 = lsimplot(Tf3,u,t);
-grid on
-title('Tf3')
-subplot(2,2,4)
-y4 = lsimplot(Tf4,u,t);
-grid on
-title('Tf4')
+title('T')
 %% Singular Value Plots
-% for kk = 1:length(freq)
-%     [~,eeS,~] = svd(evalfr(S,freq(kk)*1i));
-%     [~,eeT,~] = svd(evalfr(T,freq(kk)*1i));
-%     % Upper Singular Values
-%     usvS(kk) = eeS(1,1);
-%     usvT(kk) = eeT(1,1);
-%     % Lower Singular Values
-%     lsvS(kk) = eeS(end,end);
-%     lsvT(kk) = eeT(end,end);
-% end
-% 
-% figure
-% subplot(2,1,1)
-% semilogx(freq,usvS,'--','linewidth',2,'DisplayName','Senstivity TF')
-% hold on
-% semilogx(freq,usvT,'linewidth',1,'DisplayName','Complimentary Sensitivity TF')
-% grid on
-% xlabel('Frequency (rad/s)')
-% title('Upper Singular Values')
-% legend
-% subplot(2,1,2)
-% semilogx(freq,lsvS,'--','linewidth',2,'DisplayName','Senstivity TF')
-% hold on
-% semilogx(freq,lsvT,'linewidth',1,'DisplayName','Complimentary Sensitivity TF')
-% grid on
-% xlabel('Frequency (rad/s)')
-% title('Lower Singular Values')
-% legend
+for kk = 1:length(freq)
+    [~,eeS,~] = svd(evalfr(S,freq(kk)*1i));
+    [~,eeT,~] = svd(evalfr(T,freq(kk)*1i));
+    % Upper Singular Values
+    usvS(kk) = eeS(1,1);
+    usvT(kk) = eeT(1,1);
+    % Lower Singular Values
+    lsvS(kk) = eeS(end,end);
+    lsvT(kk) = eeT(end,end);
+end
+
+figure
+subplot(2,1,1)
+semilogx(freq,usvS,'--','linewidth',2,'DisplayName','Senstivity TF')
+hold on
+semilogx(freq,usvT,'linewidth',1,'DisplayName','Complimentary Sensitivity TF')
+grid on
+xlabel('Frequency (rad/s)')
+title('Upper Singular Values')
+legend
+subplot(2,1,2)
+semilogx(freq,lsvS,'--','linewidth',2,'DisplayName','Senstivity TF')
+hold on
+semilogx(freq,lsvT,'linewidth',1,'DisplayName','Complimentary Sensitivity TF')
+grid on
+xlabel('Frequency (rad/s)')
+title('Lower Singular Values')
+legend

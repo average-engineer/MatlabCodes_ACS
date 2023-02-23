@@ -17,7 +17,7 @@ Tf2 = minreal(K*inv(eye(size(G)) - (G*K)));
 Tf3 = minreal(G*Tf1);
 Tf4 = minreal(inv(eye(size(G)) - (G*K)));
 %% Question Part
-part = 'c';
+part = 'a';
 switch part
     case 'a'
         %% Pole Zero Map
