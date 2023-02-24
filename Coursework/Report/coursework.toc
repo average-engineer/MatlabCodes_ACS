@@ -1,0 +1,8 @@
+\contentsline {chapter}{\numberline {1}Brief Info}{3}{}%
+\contentsline {section}{\numberline {1.1}Formulas and equations}{3}{}%
+\contentsline {section}{\numberline {1.2}Figures}{3}{}%
+\contentsline {section}{\numberline {1.3}Block diagrams}{4}{}%
+\contentsline {chapter}{\numberline {2}More Info}{6}{}%
+\contentsline {section}{\numberline {2.1}Figure export from Matlab}{6}{}%
+\contentsline {section}{\numberline {2.2}References}{6}{}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

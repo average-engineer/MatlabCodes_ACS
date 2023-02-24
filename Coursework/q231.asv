@@ -5,7 +5,7 @@ clc
 format short
 s = tf('s');
 freq = logspace(-3,3,100);
-fall = 2;
+fall = 1;
 %% Verifying the model for parametric uncertainties
 mnom = 10;
 mmax = 18;
@@ -172,14 +172,6 @@ switch fall
         P22 = P(9,9);
         M = minreal(N(1:5,1:5));
 
-        %% Using Robust Control Toolbox
-        % Uncertain Closed Loop
-        Lp = W1*hp*K*tf(1,[mp cp kp])*(1 + wTau*deltau);
-        clTFp = uss(W1/(1 + Lp));
-        [N1,delta] = lftdata(clTFp);
-        N1 = minreal(tf(N1));
-        M1 = N1(1:size(delta,1),1:size(delta,1));
-
         %% Robust Stability
         % Perturbation Block Structure
         % First 4 Perturbation Blocks: Real scalar perturbation
@@ -188,27 +180,19 @@ switch fall
         for kk = 1:length(freq)
             % Using upper singular value
             [~,ee,~] = svd(evalfr(M,freq(kk)*1i));
-            [~,ee1,~] = svd(evalfr(M1,freq(kk)*1i));
             MSVFR(kk) = ee(1,1);
-            M1SVFR(kk) = ee1(1,1);
             % Using Structure Singular Value
             bounds = mussv(evalfr(M,freq(kk)*1i),BlockStructure);
             MSSVFR(kk) = max(bounds); % Using the upper bound (more reliable due to convex optimization)
-            bounds1 = mussv(evalfr(M1,freq(kk)*1i),BlockStructure);
-            M1SSVFR(kk) = max(bounds1); % Using the upper bound (more reliable due to convex optimization)
         end
 
         figure
-        semilogx(freq,MSVFR,'--','color','k','linewidth',2,'DisplayName','Upper Singular Value (M)')
-        hold on
-        semilogx(freq,M1SVFR,'color','r','Linewidth',2,'DisplayName','Upper Singular Value (M1)')
+        semilogx(freq,MSVFR,'--','color','k','DisplayName','Upper Singular Value (M)')
         xlabel('Frequency (rad/s)')
         grid on
         legend
         figure
         semilogx(freq,MSSVFR,'--','color','r','DisplayName','Structured Singular Value (M)')
-        hold on
-        semilogx(freq,M1SSVFR,'color','r','DisplayName','Structured Singular Value (M1)')
         xlabel('Frequency (rad/s)')
         grid on
         legend
@@ -225,6 +209,8 @@ switch fall
         xlabel('Frequency (rad/s)')
         grid on
         legend
+
+
 
 end
 
