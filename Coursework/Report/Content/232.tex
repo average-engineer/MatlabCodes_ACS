@@ -1,0 +1,112 @@
+\section{Linear fractional transformation}
+The transformation from $\mathbf{G}(s)$ to the state space is described by equation \eqref{ss2tf}, which can be represented using a lower LFT \cite{Fran01} as,
+\begin{align*}
+    \bm{G}(s) = \mathcal{F}_l\left(\begin{bmatrix}
+        \bm{D} & \bm{C} \\
+        \bm{B} & \bm{A}
+    \end{bmatrix},\frac{1}{s}\bm{I}\right)
+\end{align*}
+\begin{figure}[htb]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.2cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thin]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1cm, >=stealth']
+      \node[block] (P) {$\begin{matrix}
+      D & C\\
+      B & A\\
+      \end{matrix}$};
+      \node[block] (K) [below=of P] {$\frac{1}{s}I$};
+      \node[inout] (w) [left=of P] {$\bm{u}$};
+      \node[inout] (zeta) [right=of P] {$\bm{y}$};
+      \draw[->] (K.west) -| ++(-1,1) node {$\bm{\:\:\:\:\:x}$} |- (P.210);
+      \draw[->] (P.-30) -| ++(1,-1) node {$\bm{\:\:\:\:\:\dot{x}}$} |- (K.east);
+ 	 \draw[connector] (P.0) -- (zeta);
+	 \draw[connector] (w) -- (P.180);
+    \end{tikzpicture}
+	  \caption{Lower LFT representing ss2tf}
+    \label{fig:LFT1}
+\end{figure} 
+
+Considering the w-domain, we can write $$\bm{G}(w) = \mathcal{F}_l\left(\begin{bmatrix}
+        \hat{\bm{D}} & \hat{\bm{C}} \\
+        \hat{\bm{B}} & \hat{\bm{A}}
+    \end{bmatrix},\frac{1}{w}\bm{I}\right)$$
+Using the concept of interconnection of LFTs (Appendix A.7.1 in \cite{Sko05}), we can further write equation \eqref{ss2tf} as,
+\begin{align*}
+    \bm{G}(s) &= \mathcal{F}_l\left(\begin{bmatrix}
+        \bm{D} & \bm{C} \\
+        \bm{B} & \bm{A}
+    \end{bmatrix},\frac{1}{s}\bm{I}\right)\\
+    &= \mathcal{F}_l\left(\begin{bmatrix}
+        \bm{D} & \bm{C} \\
+        \bm{B} & \bm{A}
+    \end{bmatrix},\mathcal{F}_l\left(\bm{N},\frac{1}{w}\bm{I}\right)\right)\\
+    &= \mathcal{F}_l\left(\begin{bmatrix}
+        \hat{\bm{D}} & \hat{\bm{C}} \\
+        \hat{\bm{B}} & \hat{\bm{A}}
+    \end{bmatrix},\frac{1}{w}\bm{I}\right) = \hat{\bm{G}}(s)
+\end{align*}
+
+Now, using the transformation given between $w$ and $s$, we can write, $$\frac{1}{s} = \frac{cw-a}{b-dw}$$
+and
+\begin{align*}
+    \frac{1}{s}\bm{I} &= \left(\frac{cw-a}{b-dw}\right)\bm{I}\\
+    &= \frac{-c}{d}\bm{I} + \frac{(bc-ad)}{d(b-dw)}\bm{I}\\
+    &= \mathcal{F}_l\left(\bm{N},\frac{1}{w}\bm{I}\right)\\
+    &= \bm{N}_{11} + \bm{N}_{12}\frac{1}{w}\left(\bm{I} - \frac{1}{w}\bm{N}_{22}\right)^{-1}\bm{N}_{21}
+\end{align*}
+Let $\mathbf{N}_{11} = -\frac{c}{d}\mathbf{I}$ and $\mathbf{N}_{22} = \frac{b}{d}\mathbf{I}$. Then,
+\begin{align*}
+    \&bm{N}_{12}\frac{1}{w}\left(\bm{I} - \frac{1}{w}\frac{b}{d}\bm{I}\right)^{-1}\bm{N}_{21} =
+    \frac{(bc-ad)}{d(b-dw)}\bm{I}\\
+    \implies &\bm{N}_{12}\bm{N}_{21} = \left(\frac{ad-bc}{d^2}\right)\bm{I}
+\end{align*}
+Let $\mathbf{N}_{12} = \left(a-\frac{bc}{d}\right)\mathbf{I}$ and $\mathbf{N}_{21} = \frac{1}{d}\mathbf{I}$
+Then, $$\frac{1}{s}\bm{I} = \mathcal{F}_l\left(\begin{bmatrix}
+    -\frac{c}{d}\bm{I} & \left(a-\frac{bc}{d}\right)\bm{I}\\
+     \frac{1}{d}\bm{I} & \frac{b}{d}\bm{I}
+\end{bmatrix},\frac{1}{w}\bm{I}\right)$$
+Using formula A.156 from Appendix A.7.1 of \cite{Sko05}, we can calculate,
+\begin{align*}
+    \hat{\bm{D}} &= \bm{D} - \bm{C}\left(\frac{c}{d}\right)\left(\bm{I} + \bm{A}\frac{c}{d}\right)\\
+    &= \bm{D} - c\bm{C}(d\bm{I} + c\bm{A})^{-1}\bm{B}\\
+    \hat{\bm{C}} &= \bm{C}\left(\bm{I} + \frac{c}{d}\bm{A}\right){-1}\left(a-\frac{bc}{d}\right)\bm{I}\\
+    &= (ad-bc)\bm{C}\left(c\bm{A} + d\bm{I}\right)^{-1}\\
+    \hat{\bm{B}} &= \frac{1}{d}\left(\bm{I} + \frac{c}{d}\bm{A}\right)^{-1}\\
+    &= \left(c\bm{A} + d\bm{I}\right)^{-1}\bm{B}\\
+    \hat{\bm{A}} &=\left(\frac{b}{d}\right)\bm{I} + \frac{1}{d}\bm{A}\left(\bm{I} + \frac{c}{d}\bm{A}\right)^{-1}\left(a-\frac{bc}{d}\right)\\
+    &= a\bm{A}(d\bm{I} + c\bm{A})^{-1} + b\left[\bm{I} - \frac{c}{d}\bm{A}(d\bm{I} + c\bm{A})^{-1}\right]
+\end{align*}
+The inverse form (Pg. 301, \cite{Sko05}) can be used so that 
+\begin{align*}
+    &b\left[\bm{I} - \frac{c}{d}\bm{A}(d\bm{I} + c\bm{A})^{-1}\right] = b(d\bm{I} + c\bm{A})^{-1}\\
+    \implies &\hat{\bm{A}} = (a\bm{A} + b\bm{I})\left(c\bm{A} + d\bm{I}\right)^{-1}
+\end{align*}
+
+\subsection{Controllability and Observability}
+$(\hat{\mathbf{A}},\hat{\mathbf{B}})$ and $(\hat{\mathbf{A}},\hat{\mathbf{C}})$ are controllable and observable iff,
+\begin{align*}
+    &\hat{\bm{u}}_{pi} = \hat{\bm{q}}_i^H\hat{\bm{B}} \neq 0, \forall i \in [1,n] \: \&\\
+    &\hat{\bm{y}}_{pi} = \hat{\bm{C}}\hat{\bm{t}}_i \neq 0, \forall i \in [1,n]
+\end{align*}
+We know that the same eigenvectors diagonalize $\bm{A}$, $(c\bm{A} + d\bm{I})^{-1}$ and $a\bm{A} + b\bm{I}$.
+Then,
+\begin{align*}
+    \hat{\bm{A}} &= (a\bm{A} + b\bm{I})(c\bm{A} + d\bm{I})^{-1} = \left[\bm{Q}^{-1}(a\bm{A} + b\bm{I})\bm{Q}\right]\left[\bm{Q}^{-1}(c\bm{A} + d\bm{I})^{-1}\bm{Q}\right]\\
+    &= \bm{Q}^{-1}(a\bm{A} + b\bm{I})(c\bm{A} + d\bm{I})^{-1}\bm{Q}
+\end{align*}
+Thus, $\hat{\bm{A}}$ and $\bm{A}$ have the same eigenvectors. Since $c\mathbf{A} + d\mathbf{I}$ is not singular,
+\begin{align*}
+    \hat{\bm{u}}_{pi} = \bm{q}_i^H(c\bm{A} + d\bm{I})^{-1}\bm{B} \neq 0\\
+    \implies \bm{q}_i^H \neq 0 \: \& \: \bm{B} \neq 0, \forall i \in [1,n]
+\end{align*}
+which is the necessary and sufficient condition for the controllability of $(\mathbf{A},\mathbf{B})$. Thus, $(\hat{\mathbf{A}},\hat{\mathbf{B}})$ is controllable iff $(\mathbf{A},\mathbf{B})$ is controllable. The same can be shown for observability since $ad -bc \neq 0$,
+\begin{align*}
+    &\hat{\bm{y}}_{pi} = (ad-bc)\bm{C}\left(c\bm{A} + d\bm{I}\right)^{-1}\bm{t}_i \neq 0\\
+    \implies &\bm{t}_i \neq 0 \: \& \: \bm{C} \neq 0, \forall i \in [1,n]
+\end{align*}
+Thus, $(\hat{\mathbf{A}},\hat{\mathbf{C}})$ is observable iff $(\mathbf{A},\mathbf{C})$ is observable.

@@ -16,7 +16,7 @@ According to the Shifting Theorem \cite{Bha12}, the eigenvalues of $s\bm{I}-\bm{
 \begin{align*}
   s\bm{I} - \bm{A} = \sum_{i=1}^n (s - \lambda_i) \: \bm{t}_i\: \bm{q}_i^H   
 \end{align*}
-    Assuming all eigenvalues are non-zero, the eigenvalues of $\bm{A}^{-1}$ are ${\frac{1}{\lambda_1},\frac{1}{\lambda_2}....,\frac{1}{\lambda_n}}$ and eigenvalues of $(s\bm{I} - \bm{A})^{-1}$ are ${\frac{1}{s-\lambda_1},\frac{1}{s-\lambda_2}....,\frac{1}{s-\lambda_n}}$. Additionally, the same matrix diagonalizes $(s\bm{I} - \bm{A})^{-1}$ and $\bm{A}$ (Appendix A.2.1 in \cite{Sko05}). Thus, $(s\bm{I} - \bm{A})^{-1}$ and $\bm{A}$ will have the same eigenvectors. We can now write,
+    Assuming all eigenvalues are non-zero, the eigenvalues of $\bm{A}^{-1}$ are $\{\frac{1}{\lambda_1},\frac{1}{\lambda_2}....,\frac{1}{\lambda_n}\}$ and eigenvalues of $(s\bm{I} - \bm{A})^{-1}$ are $\{\frac{1}{s-\lambda_1},\frac{1}{s-\lambda_2}....,\frac{1}{s-\lambda_n}\}$. Additionally, the same matrix diagonalizes $(s\bm{I} - \bm{A})^{-1}$ and $\bm{A}$ (Appendix A.2.1 in \cite{Sko05}). Thus, $(s\bm{I} - \bm{A})^{-1}$ and $\bm{A}$ will have the same eigenvectors. We can now write,
 \begin{equation}
 (s\bm{I} - \bm{A})^{-1} = \sum_{i=1}^n \frac{\bm{t}_i\: \bm{q}_i^H}{s - \lambda_i} 
 \label{specDec2}
@@ -35,7 +35,16 @@ Thus, equation~\eqref{ss2tf} can be reformulated as,
 \end{align*}
 \textbf{Hence, proven.}
 
-\begin{flushleft}
+
+\begin{figure}[t]
+    \centering
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+    \input{images/q211SISO}
+    \end{tikzpicture}}
+    \caption{SISO Plant Response to a decaying input, $u = 2e^{-t}$.}
+    \label{siso}
+\end{figure}
 Testing for a random plant $\bm{A}$ with 3 states: 
 \begin{align*}
 \bm{A} &=
@@ -43,8 +52,19 @@ Testing for a random plant $\bm{A}$ with 3 states:
 2 & 1 & -0.5 \\
 1 & -1 & 0 \\
 -0.5 & 0 & -4 
-\end{bmatrix},
+\end{bmatrix}
 \end{align*}
+\begin{figure}[h]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+    \input{images/q211MIMO}
+    \end{tikzpicture}}
+    \caption{MIMO Plant Response to a decaying input, $u = [2e^{-t}\: 0]^T$. }
+    \label{mimo}
+\end{figure}
+
+
 in the case of SISO;
 \begin{align*}
 \bm{B} = 
@@ -59,14 +79,6 @@ in the case of SISO;
 \end{bmatrix},
 \bm{D} = \bm{0}
 \end{align*}
-\begin{figure}
-    \centering
-    \begin{tikzpicture}
-    \input{images/q211SISO}
-    \end{tikzpicture}
-    \caption{SISO Plant Response to a decaying input, $u = 2e^{-t}$.}
-    \label{siso}
-\end{figure}
 and MIMO (TITO);
 \begin{align*}
 \bm{B} = 
@@ -86,14 +98,5 @@ and MIMO (TITO);
 0 & 0 \\
 \end{bmatrix}
 \end{align*}
-\begin{figure}
-    \centering
-    \begin{tikzpicture}
-    \input{images/q211MIMO}
-    \end{tikzpicture}
-    \caption{MIMO Plant Response to a decaying input, $u = [2e^{-t}\: 0]^T$. }
-    \label{mimo}
-\end{figure}
 
 As both figures \ref{siso} and \ref{mimo} show, the spectral decomposition and the standard \emph{ss2tf()} function in matlab leads to the same plants with the same responses to inputs.
-\end{flushleft}

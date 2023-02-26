@@ -1,0 +1,450 @@
+\section{Stability and LFT}
+\subsection{Parametric Uncertainty Modelling}
+The mass varies from $-50\%$ to $80\%$ of the nominal mass value. We can model mass uncertainty as,
+\begin{align*}
+    m_p = \frac{\Bar{m} + b_m\Delta_m}{1 + d_m\Delta_m}, \left|\Delta_m\right| \le 1\\
+    b_m = 0.385\Bar{m}, d_m = -0.23
+\end{align*}
+In a similar way, we can model spring stiffness and output gain, which vary with non-uniform bounds as the mass.
+\begin{align*}
+    k_p = \frac{\Bar{k} + b_k\Delta_k}{1 + d_k\Delta_m}, \left|\Delta_k\right| \le 1\\
+    b_k = -0.28\Bar{k}, d_k = -0.6\\
+    h_p = \frac{\Bar{h} + b_h\Delta_h}{1 + d_h\Delta_h}, \left|\Delta_h\right| \le 1\\
+    b_h = -0.28\Bar{h}, d_h = -0.6
+\end{align*}
+Since the damping varies with uniform bounds,
+\begin{align*}
+    cp = \Bar{c}\left(1 + r_c\Delta_c\right), \left|\Delta_c\right| \le 1\\
+    r_c = \frac{c_{max} - c_{min}}{c_{max} + c_{min}}
+\end{align*}
+Since these are parametric uncertainties, $\{\Delta_m,\Delta_c,\Delta_k,\Delta_h\} \in \mathbb{R}$. 
+For any function $f(\delta)$ of the form,
+$$f(\delta) = \frac{\alpha+\beta\delta}{1+\gamma\delta}$$
+we can use lower LFT to represent $f(\delta)$ \cite{Fran01} as,
+\begin{align*}
+    f(\delta) = \mathcal{F}_l(\bm{M},\delta), \bm{M} = 
+    \begin{bmatrix}
+        \alpha & \beta-\alpha\gamma\\
+        1 & -\gamma
+    \end{bmatrix}\\
+    f^{-1}(\delta) = \mathcal{F}_l(\Tilde{\bm{M}},\delta), \Tilde{\bm{M}} = 
+    \begin{bmatrix}
+        \frac{1}{\alpha} & \frac{\gamma}{\alpha}^- \frac{\beta}{\alpha^2}\\
+        1 & \frac{-\beta}{\alpha}
+    \end{bmatrix}
+\end{align*}
+Thus, we can represent the parametric uncertainties in the form of lower LFTs with their respective $\Delta$s as,
+\begin{align*}
+    m_p = \mathcal{F}_l\left(\begin{bmatrix}
+        \frac{1}{\Bar{m}}&\frac{d_m}{\Bar{m}} - \frac{b_m}{\Bar{m}^2}\\
+        1&\frac{-b_m}{\Bar{m}}
+    \end{bmatrix},\Delta_m\right)\\
+    c_p = \mathcal{F}_l\left(\begin{bmatrix}
+        \Bar{c}&1\\
+        r_c\Bar{c}&0
+    \end{bmatrix},\Delta_c\right)\\
+    k_p = \mathcal{F}_l\left(\begin{bmatrix}
+        \Bar{k}&b_k-\Bar{k}d_k\\
+        1&-d_k
+    \end{bmatrix},\Delta_k\right)\\
+    h_p = \mathcal{F}_l\left(\begin{bmatrix}
+        \Bar{h}&b_h-\Bar{h}d_h\\
+        1&-d_h
+    \end{bmatrix},\Delta_h\right)\\
+\end{align*}
+
+\subsection{Block Diagram}
+\begin{figure}[h!]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=0.5cm, minimum width=0.5cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thin]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=2cm, >=stealth']
+      %%%%%%%%%%%%%%%%%%%%%%% BLOCKS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % Mass
+      \node[block] (m) {$\begin{matrix}
+          \frac{1}{\Bar{m}}&\frac{d_m}{\Bar{m}} - \frac{b_m}{\Bar{m}^2}\\
+        1&\frac{-b_m}{\Bar{m}}
+      \end{matrix}$};
+      % Differentiator 1
+      \node[block, right of = m] (diff1) {$\frac{1}{s}$};
+      % Differentiator 1
+      \node[block, right of = diff1] (diff2) {$\frac{1}{s}$};
+      % Output Gain
+      \node[block, right of = diff2] (h) {$\begin{matrix}
+        \Bar{h}&b_h-\Bar{h}d_h\\
+        1&-d_h
+    \end{matrix}$};
+     % Damping
+     \node[block, below of = m, node distance = 4cm] (c) {$\begin{matrix}
+        \Bar{c}&1\\
+        r_c\Bar{c}&0
+     \end{matrix}$};
+     % Stiffness
+     \node[block, below of = c, node distance = 4cm] (k) {$\begin{matrix}
+        \Bar{k}&b_k-\Bar{k}d_k\\
+        1&-d_k
+     \end{matrix}$};
+     % Deltam
+     \node[block,below of = m] (delm) {$\Delta_m$};
+     % Deltah
+     \node[block,below of = h] (delh) {$\Delta_h$};
+     % Deltac
+     \node[block,below of = c] (delc) {$\Delta_c$};
+     % Deltak
+     \node[block,below of = k] (delk) {$\Delta_k$};
+     % W2 weight
+     \node[block,left of = m, node distance = 3cm] (w2) {$W_2$};
+     % W1 weight
+     \node[block,right of = h, node distance = 3cm] (w1) {$W_1$};
+     % Controller
+     \node[block,left of = w2] (K) {$K$};
+
+     %%%%%%%%%%%%%%%%%%%%%%% SUMMATIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     \node[sum,left of = K] (s1) {};
+     \node[sum,left of = m] (s2) {};
+     \node[sum,right of = h] (s3) {};
+     \node[dummy] (d1) [below right=0.1cm and 0.05cm of s1] {$-$};
+     \node[dummy] (d2) [below right=0.1cm and 0.05cm of s2] {$-$};
+
+     %%%%%%%%%%%%%%%%%%%%%%% I/O SIGNALS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     \node[inout,right of = w1, node distance = 0.75cm] (z) {$z$};
+     \node[inout,above of = s3] (d) {$d$};
+
+     %%%%%%%%%%%%%%%%%%%%%%% BRANCHES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     \node[branch,right of = diff1,node distance = 1cm] (b1) {};
+     \node[branch,right of = diff2,node distance = 0.5cm] (b2) {};
+     \node[branch,right of = s3,node distance = 0.25cm] (b3) {};
+     \node[branch,below of = s2,node distance = 4cm] (b4) {};
+     %\node[branch,below of = b4,node distance = 4cm] (b5);
+     \node[branch,below of = b3,node distance = 11cm] (b6) {};
+
+     %%%%%%%%%%%%%%%%%%%%%%% CONNECTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     % Interconnection between m and delm
+     \draw[->] (delm.west) -| ++(-1,1) node [yshift = -0.3cm, xshift = -0.3cm] {$u_m$} |- (m.200);
+     \draw[->] (m.-20) -| ++(0.25,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_m$} |- (delm.east);
+
+     % Interconnection between c and delc
+     \draw[->] (delc.east) -| ++(1,1) node [yshift = -0.3cm, xshift = -0.3cm] {$u_c$} |- (c.-20);
+     \draw[->] (c.200) -| ++(-0.75,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_c$} |- (delc.west);
+
+     % Interconnection between k and delk
+     \draw[->] (delk.east) -| ++(1,1) node [yshift = -0.3cm, xshift = 0.3cm] {$u_k$} |- (k.-20);
+     \draw[->] (k.200) -| ++(-0.25,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_k$} |- (delk.west);
+
+     % Interconnection between h and delh
+     \draw[->] (delh.west) -| ++(-1,1) node [yshift = -0.3cm, xshift = 0.3cm] {$u_h$} |- (h.200);
+     \draw[->] (h.-20) -| ++(0.25,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_h$} |- (delh.east);
+
+     \draw[connector] (s1) -- (K);
+     \draw[connector] (K) -- (w2);
+     \draw[connector] (w2) -- node[] {$F$} (s2);
+     \draw[connector] (s2) -- (m.180);
+     \draw[connector] (m.0) -- node[] {$\dot{x}_2$} (diff1);
+     \draw[connector] (diff1) -- node[] {$x_2$} (diff2);
+     \draw[connector] (diff2) -- node[] {$x_1$} (h.180);
+     \draw[connector] (h.0) -- (s3);
+     \draw[connector] (d) -- (s3);
+     \draw[connector] (s3) -- (w1);
+     \draw[connector] (w1) -- (z);
+     \draw[thick] (b3) -- (b6);
+     \draw[connector] (b6) -| (s1);
+     \draw[connector] (c.180) -- (b4);
+     \draw[connector] (k.180) -| (s2);
+     \draw[connector] (b1) |- (c.0);
+     \draw[connector] (b2) |- (k.0);
+     
+    
+    \end{tikzpicture}
+    
+	  \caption{Block Diagram for the uncertain dynamic system.}
+    \label{fig:blockDiagramA}
+\end{figure}
+
+\begin{figure}[htb]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.2cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thin]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1.5cm, >=stealth']
+    % Blocks
+      \node[block] (P) {$\bm{P}$};
+      \node[block, below of = P] (K) {$K$};
+      \node[block, above of = P] (delta) {$\Delta$};
+      % Signals
+      \node[inout, left of = P,xshift = -1.5cm] (w) {$\begin{bmatrix}
+      x_1\\
+      x_2\\
+      d
+      \end{bmatrix}$};
+      \node[inout, right of = P,xshift = 1.5cm] (z) {$\begin{bmatrix}
+      \dot{x_1}\\
+      \dot{x_2}\\
+      W_1y
+      \end{bmatrix}$};
+      % Connections
+      \draw[->] (K.west) -| ++(-1,1) node [yshift = -0.3cm, xshift = -0.3cm] {$\bm{u}$} |- (P.210);
+      \draw[->] (P.-30) -| ++(1,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$\bm{v}$} |- (K.east);
+      \draw[->] (delta.west) -| ++(-1,-1) node [yshift = 0.2cm, xshift = -0.3cm] {$\bm{u}_\Delta$} |- (P.150);
+      \draw[->] (P.30) -| ++(1,1) node [yshift = -0.3cm, xshift = 0.3cm] {$\bm{y}_\Delta$} |- (delta.east);
+      \draw[connector] (P.0) -- (z);
+	 \draw[connector] (w) -- (P.180);
+    \end{tikzpicture}
+	  \caption{Generalized Uncertain Closed Loop Configuration with Parametric Uncertainty.}
+    \label{fig:blockDiagramB}
+\end{figure}
+
+The system can be represented in block diagram form as done if Figure \ref{fig:blockDiagramA}. Moreover, we can generalize the block diagram in form of a lower LFT and upper LFT as seen in Figure \ref{fig:blockDiagramB}. In the generalized configuration, the following is considered,
+\begin{align*}
+    \bm{\Delta} =
+    \begin{bmatrix}
+        \Delta_m & 0 & 0 & 0\\
+        0 & \Delta_c & 0 & 0\\
+        0 & 0 & \Delta_k & 0\\
+        0 & 0 & 0 & \Delta_m
+    \end{bmatrix},
+    \bm{y}_\Delta = \begin{bmatrix}
+        y_m\\
+        y_c\\
+        y_k\\
+        y_h
+    \end{bmatrix},
+    \bm{u}_\Delta = \begin{bmatrix}
+        u_m\\
+        u_c\\
+        u_k\\
+        u_h
+    \end{bmatrix}\\
+    z = W_1y, v = -y,
+    \begin{bmatrix}
+        \bm{y}_\Delta\\
+        \dot{\bm{x}}\\
+        z\\
+        v
+    \end{bmatrix} = 
+    \bm{P}\begin{bmatrix}
+        \bm{u}_\Delta\\
+        \bm{x}\\
+        d\\
+        u
+    \end{bmatrix}
+\end{align*}
+Analyzing the relations between different signals, the generalized plant $\mathbf{P}$ can be derived as,
+\begin{align*}
+    \bm{P} = 
+    \begin{bmatrix}
+        \frac{-b_m}{\Bar{m}} & -1 & -(b_k-\Bar{k}d_k) & 0 & -\Bar{k} & -\Bar{c} & 0 & 1\\
+        0 & 0 & 0 & 0 & 0 & r_c\Bar{c} & 0 & 0\\
+        0 & 0 & -d_k & 0 & 1 & 0 & 0 & 0\\
+        0 & 0 & 0 & -d_h & 1 & 0 & 0 & 0\\
+        0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+        \frac{d_m}{\Bar{m}} - \frac{b_m}{\Bar{m}^2} & \frac{-1}{\Bar{m}} & \frac{-(b_k-\Bar{k}d_k)}{\Bar{m}} & 0 & \frac{-\Bar{k}}{\Bar{m}} & \frac{-\Bar{c}}{\Bar{m}} & 0 & \frac{1}{\Bar{m}}\\
+        0 & 0 & 0 & W_1(b_h-\Bar{h}d_h) & W_1\Bar{h} & 0 & W_1 & 0\\
+        0 & 0 & 0 & -(b_h-\Bar{h}d_h) & -\Bar{h} & 0 & -1 & 0
+    \end{bmatrix}
+\end{align*}
+\textbf{Note}: \textit{The above generalized plant matrix has been formed assuming $W_2$ is a part of the controller. If $W_2$ is considered a part of the plant, then it will populate the last column corresponding to row 1 and row 6 of the generalized plant matrix.}.
+
+The number of uncertainty channels in the system will be 4, corresponding to the 4 real parametric perturbations introduced. The above uncertain system is put into the \emph{Robust Control Toolbox} in MATLAB, by inputting the following uncertain plant transfer function $$G_p(s) = \frac{h_p}{m_ps^2 + c_ps + k_p}$$
+The uncertain state space model in MATLAB obtained has 2 states, and 4 uncertainty output channels.
+
+\subsection{PI Controller Design}
+First the lag compensator is designed. $\tau$ is taken as $10$, and $k_0$ is set such that the gain cross-over frequency is $1$ rad/s. For such a condition, we obtain $k_0$ as $5.3547$. A seperate lead compensator is not designed for this controller, instead the output weight $W_2$ can be considered as a lead compensator with $T = 0.7$ and $\alpha = 0.1$. Thus, the lead-lag compensated PI controller is given by,
+$$K(s) = 0.3k_0\left(\frac{0.7s+1}{0.07s+1}\right)\left(\frac{10s+1}{10s}\right)$$
+\subsection{Robust Stability}
+We can obtain the unperturbed closed loop of the system with, $$\bm{N} = \mathcal{F}_l(\bm{P},K)$$
+We also know that the $\mathbf{M}$ matrix which mapes $\bm{u}_\Delta$ to $\bm{y}_\Delta$ is, $$\bm{M} = \bm{N}_{11}$$
+In order to compute the robust stability using \emph{Robust Control Toolbox}, the following uncertain transfer function mapping the disturbance signal to the exogenous output is used,
+$$H(s) = \frac{W_1}{1 + \frac{W_1h_pK}{m_ps^2+c_ps+k_p}}$$
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q231a}
+    \end{tikzpicture}}
+    \caption{Comparison of the upper singular values of $\mathbf{M}$ computed manually with the one computed from \emph{Robust Control Toolbox}.}
+    \label{fig:ssv}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q231b}
+    \end{tikzpicture}}
+    \caption{Structured singular values of $\mathbf{M}$ computed from \emph{Robust Control Toolbox}.}
+    \label{fig:usv}
+\end{figure}
+The command \emph{lftdata(.)} is used to obtain the unperturbed closed loop system, and the $\mathbf{M}$ is obtained by taking the first 4 rows and columns of the closed loop system matrix.
+
+
+
+Figure \ref{fig:ssv} shows us that the manually computed $\mathbf{M}$ has more conservatism than the one computed from \emph{Robust Control Toolbox}. Additionally, since the perturbation matrix is structured in the form of a block diagonal matrix, it makes more sense to compute the \emph{structured singular value} of $\mathbf{M}$, since the structured singular value consitutes the necessary and sufficient condition for RS when $\mathbf{\Delta}$ is structured.
+Figure \ref{fig:usv} shows us that $\mu_\Delta(\mathbf{M})$ is roughly equal to $0.6$, which implies RS.
+
+\subsection{Nominal Performance}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q231c}
+    \end{tikzpicture}}
+    \caption{Upper singular values of $\mathbf{N}_{22}$.}
+    \label{fig:np}
+\end{figure}
+Figure \ref{fig:np} shows us that $\Bar{\sigma}(\mathbf{N}_{22}) > 1$, for higher frequencies which implies NP is not satisfied.
+
+\subsection{Uncertain Time-Delay}
+Since the uncertain time-delay has uniform bounds, multiplicative uncertainty can be used to model the perturbation. Using first-order Pade´ approximation for the time delay, we have a standard form of multiplicative uncertainty weight to model Gain and Time-Delay Uncertainty, as proposed by Lundstörm \cite{Sko05},
+$$w_M(s) = \frac{\left(1 + \frac{r_k}{2}\right)\tau_{max}s + r_k}{\frac{\tau_{max}}{2}s + 1}$$
+Since there is only time-delay uncertainty, $r_k = 0$ and
+\begin{align*}
+    w_\tau(s) = \frac{\tau_{max}s}{\frac{\tau_{max}}{2}s + 1}, \|\Delta_\tau(j\omega)\| \le 1\\
+    G_p(s) = \left(\frac{h_p}{m_ps^2 + c_ps + k_p}\right)e^{-\tau_ps}
+\end{align*}
+
+Figure \ref{fig:blockDiagramC} shows the generalised representation of the system with the additional time delay uncertainty. The generalized plant is obtained as,
+\begin{align*}
+    \bm{P} = 
+    \begin{bmatrix}
+        \frac{-b_m}{\Bar{m}} & -1 & -(b_k-\Bar{k}d_k) & 0 & 1 & -\Bar{k} & -\Bar{c} & 0 & 1\\
+        0 & 0 & 0 & 0 & 0 & 0 & r_c\Bar{c} & 0 & 0\\
+        0 & 0 & -d_k & 0 & 0 & 1 & 0 & 0 & 0\\
+        0 & 0 & 0 & -d_h & 0 & 1 & 0 & 0 & 0\\
+        0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & w_\tau\\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+        \frac{d_m}{\Bar{m}} - \frac{b_m}{\Bar{m}^2} & \frac{-1}{\Bar{m}} & \frac{-(b_k-\Bar{k}d_k)}{\Bar{m}} & 0 & \frac{-1}{\Bar{m}} & \frac{-\Bar{k}}{\Bar{m}} & \frac{-\Bar{c}}{\Bar{m}} & 0 & \frac{1}{\Bar{m}}\\
+        0 & 0 & 0 & W_1(b_h-\Bar{h}d_h) & 0 & W_1\Bar{h} & 0 & W_1 & 0\\
+        0 & 0 & 0 & -(b_h-\Bar{h}d_h) & 0 & -\Bar{h} & 0 & -1 & 0
+    \end{bmatrix}
+\end{align*}
+\begin{figure}[htb]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=0.5cm, minimum width=0.5cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thin]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=2cm, >=stealth']
+      %%%%%%%%%%%%%%%%%%%%%%% BLOCKS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % Mass
+      \node[block] (m) {$\begin{matrix}
+          \frac{1}{\Bar{m}}&\frac{d_m}{\Bar{m}} - \frac{b_m}{\Bar{m}^2}\\
+        1&\frac{-b_m}{\Bar{m}}
+      \end{matrix}$};
+      % Differentiator 1
+      \node[block, right of = m] (diff1) {$\frac{1}{s}$};
+      % Differentiator 1
+      \node[block, right of = diff1] (diff2) {$\frac{1}{s}$};
+      % Output Gain
+      \node[block, right of = diff2] (h) {$\begin{matrix}
+        \Bar{h}&b_h-\Bar{h}d_h\\
+        1&-d_h
+    \end{matrix}$};
+     % Damping
+     \node[block, below of = m, node distance = 4cm] (c) {$\begin{matrix}
+        \Bar{c}&1\\
+        r_c\Bar{c}&0
+     \end{matrix}$};
+     % Stiffness
+     \node[block, below of = c, node distance = 4cm] (k) {$\begin{matrix}
+        \Bar{k}&b_k-\Bar{k}d_k\\
+        1&-d_k
+     \end{matrix}$};
+     % Deltam
+     \node[block,below of = m] (delm) {$\Delta_m$};
+     % Deltah
+     \node[block,below of = h] (delh) {$\Delta_h$};
+     % Deltac
+     \node[block,below of = c] (delc) {$\Delta_c$};
+     % Deltak
+     \node[block,below of = k] (delk) {$\Delta_k$};
+     % W1 weight
+     \node[block,right of = h, node distance = 3cm] (w1) {$W_1$};
+     % Controller
+     \node[block,left of = m, node distance = 5.5cm] (K) {$K$};
+     % Time Delay uncertainty weight
+     \node[block,above right = 0.5cm of K] (wtau) {$w_\tau$};
+     % Deltatau
+     \node[block,right of = wtau, node distance = 1.5cm] (deltau) {$\Delta_\tau$};
+
+     %%%%%%%%%%%%%%%%%%%%%%% SUMMATIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     \node[sum,left of = K,node distance = 0.75cm] (s1) {};
+     \node[sum,left of = m] (s2) {};
+     \node[sum,right of = h] (s3) {};
+     \node[dummy] (d1) [below right=0.1cm and 0.05cm of s1] {$-$};
+     \node[dummy] (d2) [below right=0.1cm and 0.05cm of s2] {$-$};
+
+     %%%%%%%%%%%%%%%%%%%%%%% I/O SIGNALS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     \node[inout,right of = w1, node distance = 0.75cm] (z) {$z$};
+     \node[inout,above of = s3] (d) {$d$};
+
+     %%%%%%%%%%%%%%%%%%%%%%% BRANCHES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     \node[branch,right of = diff1,node distance = 1cm] (b1) {};
+     \node[branch,right of = diff2,node distance = 0.5cm] (b2) {};
+     \node[branch,right of = s3,node distance = 0.25cm] (b3) {};
+     \node[branch,below of = s2,node distance = 4cm] (b4) {};
+     \node[branch,below of = b3,node distance = 11cm] (b5) {};
+     \node[branch,right of = K,node distance = 0.5cm] (b6) {};
+     
+
+     %%%%%%%%%%%%%%%%%%%%%%% CONNECTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     % Interconnection between m and delm
+     \draw[->] (delm.west) -| ++(-1,1) node [yshift = -0.3cm, xshift = -0.3cm] {$u_m$} |- (m.200);
+     \draw[->] (m.-20) -| ++(0.25,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_m$} |- (delm.east);
+
+     % Interconnection between c and delc
+     \draw[->] (delc.east) -| ++(1,1) node [yshift = -0.3cm, xshift = -0.3cm] {$u_c$} |- (c.-20);
+     \draw[->] (c.200) -| ++(-0.75,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_c$} |- (delc.west);
+
+     % Interconnection between k and delk
+     \draw[->] (delk.east) -| ++(1,1) node [yshift = -0.3cm, xshift = 0.3cm] {$u_k$} |- (k.-20);
+     \draw[->] (k.200) -| ++(-0.25,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_k$} |- (delk.west);
+
+     % Interconnection between h and delh
+     \draw[->] (delh.west) -| ++(-1,1) node [yshift = -0.3cm, xshift = 0.3cm] {$u_h$} |- (h.200);
+     \draw[->] (h.-20) -| ++(0.25,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$y_h$} |- (delh.east);
+
+     \draw[connector] (s1) -- (K);
+     \draw[connector] (K) -- node[] {$F$} (s2);
+     \draw[connector] (s2) -- (m.180);
+     \draw[connector] (m.0) -- node[] {$\dot{x}_2$} (diff1);
+     \draw[connector] (diff1) -- node[] {$x_2$} (diff2);
+     \draw[connector] (diff2) -- node[] {$x_1$} (h.180);
+     \draw[connector] (h.0) -- (s3);
+     \draw[connector] (d) -- (s3);
+     \draw[connector] (s3) -- (w1);
+     \draw[connector] (w1) -- (z);
+     \draw[thick] (b3) -- (b5);
+     \draw[connector] (b5) -| (s1);
+     \draw[connector] (c.180) -- (b4);
+     \draw[connector] (k.180) -| (s2);
+     \draw[connector] (b1) |- (c.0);
+     \draw[connector] (b2) |- (k.0);
+     \draw[connector] (b6) |- (wtau);
+     \draw[connector] (wtau) -- node[] {$y_\tau$} (deltau);
+     \draw[connector] (deltau) -| node[] {$u_\tau$} (s2);
+     
+    
+    \end{tikzpicture}
+    
+	  \caption{Block Diagram for the uncertain dynamic system with additional time-delay uncertainty.}
+    \label{fig:blockDiagramC}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q231d}
+    \end{tikzpicture}}
+    \caption{Structured singular values of $\mathbf{M}$ with added time delay uncertainty computed from \emph{Robust Control Toolbox}.}
+    \label{fig:ssv2}
+\end{figure}
+
+It is found that the upper singular values of $\mathbf{M}$ and $\mathbf{N}_{22}$ stay roughly the same as compared to when there is no time delay. Hence, the time delay has no effect on the nominal performance. But as figure \ref{fig:ssv2} shows, the robustness slightly decreases between the frequencies $0.61$ rad/s and $100$ rad/s.

@@ -1,5 +1,5 @@
 \section{Repeated Eigenvalues}
-The \emph{Jordon Decomposition Theorem} states that for any real or complex square matrix $\mathbf{A}$, there exists an invertible $\mathbf{P}$ such that:
+The \emph{Jordan Decomposition Theorem} states that for any real or complex square matrix $\mathbf{A}$, there exists an invertible $\mathbf{P}$ such that:
 \begin{equation}
     \bm{A} = \bm{P}\: \bm{J}\: \bm{P}^{-1}
     \label{jordEq}
@@ -13,7 +13,7 @@ where,
 \vdots & \vdots & \ddots & \vdots \\
 0 & 0 & \dots & \bm{J}_{k_m}\:(\lambda_m) 
 \end{bmatrix},
- \bm{J_{k_i}}(\lambda_i) =
+ \bm{J}_{k_i}(\lambda_i) =
 \begin{bmatrix}
     \lambda_1 & 1 & 0 & \dots & 0 \\
     \vdots & \lambda_2 & 1 & \dots & \vdots \\
@@ -55,8 +55,10 @@ where \{$\bm{v}_{i_1},\bm{v}_{i_1} ... \bm{v}_{i_m}$\} form the eigenspace of $\
 \vdots \\
 \bm{V_m}^H \\
 \end{bmatrix} \\
+\end{align*}
 \\
-&=
+\begin{align*}
+\implies \bm{A}&=
 \begin{bmatrix}
 \bm{V_1} & \bm{V_2} & \dots & \bm{V_m} \\ 
 \end{bmatrix}

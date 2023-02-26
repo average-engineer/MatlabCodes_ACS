@@ -1,0 +1,38 @@
+\section{Youla parametrization}
+The set of all real-rational and proper controllers which stabilize an unstable plant $\mathbf{G}(s)$ assuming the feedback configuration described by Figure \ref{fig:blockDiagram1} \cite{Bru87} is parametrised as,
+\begin{align*}
+    \bm{K} = (\bm{Y}-\bm{MQ})(\bm{Y}-\bm{MQ})^{-1} = (\Tilde{\bm{X}}-\bm{Q}\Tilde{\bm{N}})^{-1}(\Tilde{\bm{Y}}-\bm{Q}\Tilde{\bm{M}})
+\end{align*}
+where $\mathbf{Q}(s) \in \mathcal{RH}_\infty$. The reduced plant has 2 poles in the open RHP ($s= 0.6951$ and $s = 0.5937$). Let, 
+\begin{align*}
+    \bm{Q}(s) = 
+    \begin{bmatrix}
+        \frac{1}{s+1}&0\\
+        0&\frac{1}{s+1}
+    \end{bmatrix}
+\end{align*}
+
+The closed-loop transfer functions are always affine functions of $\mathbf{Q}(s)$ like $\mathbf{S} = \mathbf{H}_1 + \mathbf{H}_2\mathbf{QH}_3$. A similar procedure, as employed in \emph{Question 2.3} can be used in calculating the sensitivity and complimentary sensitivity transfer functions. Since for the doubly coprime factorizations, positive feedback (\ref{fig:blockDiagram1}) is assumed \cite{Bru87}, our closed loop transfer functions will be,
+\begin{align*}
+    \bm{S}(s) = (\bm{I}-\bm{GK})^{-1} = \Tilde{\bm{M}}(\bm{X}-\Tilde{\bm{N}}\bm{Q})\\
+    \bm{T}(s) = \bm{I}-\bm{S} = \Tilde{\bm{N}}(\Tilde{\bm{M}}\bm{Q}-\bm{Y})
+\end{align*}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q243a}
+    \end{tikzpicture}}
+    \caption{Response of $\mathbf{S}$ and $\mathbf{T}$ to decaying input, $u = [2e^{-t}\: 0]^T$.}
+    \label{fig:STRes}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q243b}
+    \end{tikzpicture}}
+    \caption{Upper and Lower Singular values of $\mathbf{S}$ and $\mathbf{T}$.}
+    \label{fig:STssv}
+\end{figure}
+As seen in Figure \ref{fig:STRes}, both the closed-loop transfer functions show stable responses. We can also draw some conclusions regarding the robustness and performance of the controller from Figure \ref{fig:STssv}. For frequencies less than $10$ rad/s, $\Bar{\sigma}(\mathbf{T})$ and $\Bar{\sigma}(\mathbf{S})$ are very high, which imply very high sensitivity to input and output channel uncertainties (Chapter 3 in \cite{Sko05}). Additionally, large $\Bar{\sigma}(\mathbf{S})$ for low frequencies implies poor controller performance. 

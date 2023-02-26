@@ -1,0 +1,81 @@
+\section{Coprime Factorization}
+The reduced system is given by,
+$$\bm{G}(s) \overset{\mathrm{\textit{S}}}{=} 
+\begin{bmatrix}
+    \bm{A} & \bm{B}\\
+    \bm{C}& \bm{D}
+\end{bmatrix}$$
+The pre-requisite for the Doubly Co-prime factorization of $\mathbf{G}(s)$ is that the system should have no hidden unstable modes \cite{Bru87}. To that end, the ranks of the controllability and observability matrices are computed in MATLAB using \emph{Control System Toolbox} commands \emph{crtb()} and \emph{obsv()}. Both the matrices have a rank equal to the number of reduced states, thus there exist no unstable hidden modes. 
+Let the doubly co-prime factorization of $\mathbf{G}(s)$ be given by,
+\begin{equation}
+    \bm{G}(s) = \bm{N}\bm{M}^{-1} = \Tilde{\bm{M}}^{-1}\Tilde{\bm{N}}, \:
+    \begin{bmatrix}
+        \Tilde{\bm{X}} & -\Tilde{\bm{Y}}\\
+        -\Tilde{\bm{N}} & \Tilde{\bm{M}}
+    \end{bmatrix}
+    \begin{bmatrix}
+        \bm{M}&\bm{Y}\\
+        \bm{N}&\bm{X}
+    \end{bmatrix} = \bm{I}
+    \label{eq:doubly}
+\end{equation}
+
+The procedure described in detail in \cite{Bru87} is followed. The real matrix $\mathbf{F}$ such that $\mathbf{A}_F = \mathbf{A} + \mathbf{BF}$ is stable is chosen using the pole-placement algorithm in MATLAB's \emph{Control System Toolbox}, which makes use of the \emph{Ackerman's Formula} to compute the controller gain matrix $\mathbf{K}$ for which the closed-loop poles of the state-feedback regulator lie on the desired open-LHP locations. Naturally, in this context, $\mathbf{F}$ is the $\mathbf{K}$. The desired pole locations of $\mathbf{A}_F$ is chosen as $[-2,-2,-1,-1]^T$. A similar thing is done for $\mathbf{H}$, such that $\mathbf{A}_H = \mathbf{A} + \mathbf{HC}$ is stable, but this time using the pole placement function in the context of a state-feedback observer design. The obtained matrices are,
+\begin{align*}
+    &\bm{F} =
+    \begin{bmatrix}
+        -322.0232&80.3511&42.7952&383.8125\\
+        -456.2417&113.7052&62.4080&546.3325
+    \end{bmatrix}\\
+    &\bm{H} =
+    \begin{bmatrix}
+        40.9207&-40.0125&\\
+        53.8971&-53.6970\\
+        42.4338&-42.5641\\
+        16.7635&-16.4317
+    \end{bmatrix}\\
+\end{align*}
+Then,
+\begin{align*}
+    &\bm{N}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_F & \bm{B}\\
+        \bm{C} + \bm{DF}& \bm{D}
+    \end{bmatrix},
+    \Tilde{\bm{N}}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_H & \bm{B} + \bm{HD}\\
+        \bm{C}& \bm{D}
+    \end{bmatrix}\\
+    &\bm{M}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_F & \bm{B}\\
+        \bm{F}& \bm{I}
+    \end{bmatrix},
+    \Tilde{\bm{M}}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_H & \bm{H}\\
+        \bm{C}& \bm{I}
+    \end{bmatrix}\\
+    &\bm{X}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_F & -\bm{H}\\
+        \bm{C} + \bm{DF}& \bm{I}
+    \end{bmatrix},
+    \Tilde{\bm{X}}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_H & -\bm{B} - \bm{HD}\\
+        \bm{F}& \bm{I}
+    \end{bmatrix}\\
+    &\bm{Y}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_F & -\bm{H}\\
+        \bm{F}& \bm{O}
+    \end{bmatrix},
+    \Tilde{\bm{Y}}(s) \overset{\mathrm{\textit{S}}}{=} 
+    \begin{bmatrix}
+        \bm{A}_H & -\bm{H}\\
+        \bm{F}& \bm{O}
+    \end{bmatrix}
+\end{align*}
+All 8 TF matrices obtained belong to $\mathcal{RH}\infty$, and satisfy Equation \eqref{eq:doubly}.

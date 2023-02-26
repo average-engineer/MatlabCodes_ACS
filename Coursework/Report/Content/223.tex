@@ -1,0 +1,74 @@
+\section{Euclids algorithm}
+The given transfer function can be factorised as follows:
+\begin{equation}
+G(s) = \frac{s-1}{(s+2)(s-2)(s+1)}
+ \label{eq:G}
+\end{equation}
+The procedure using Euclid's algorithm is followed, as given in Chapter 5 of \cite{Doyle90}. Let $$s = \frac{1-\lambda}{\lambda}$$
+Then, G(s) can be transformed in $\lambda$ as,
+\begin{align*}
+    \tilde{G}(\lambda) = \frac{\lambda^2(1-2\:\lambda)}{(1-\lambda)(1-3\:\lambda)}
+    = \frac{n(\lambda)}{m(\lambda)}
+\end{align*}
+where $n(\lambda)$ and $m(\lambda)$ are coprime polynomials:
+\begin{align*}
+n(\lambda) = \lambda^2 - 2\:\lambda^3 \:,\: m(\lambda) = 1-2\:\lambda-3\:\lambda^2
+\end{align*}
+\textbf{Iteration 1}
+\begin{align*}
+    &n=mq_1 + r_1\\
+    &q_1 = \frac{2\lambda}{3} - \frac{7}{9}\: ,\: r_1 = \frac{7}{9} - \frac{20\lambda}{9}   
+\end{align*}
+\textbf{Iteration 2}
+\begin{align*}
+    &m=r_1q_2 + r_2\\
+    &q_2 = \frac{27\lambda}{20} + \frac{549}{400}\: ,\: r_2 = \frac{-27}{400}   
+\end{align*}
+Since $r_2$ is a non-zero constant, the algorithm is stopped.
+Now,
+\begin{align*}
+    &r_2 = -q_2n + (1 + q_1q_2)m\\
+    &\left(\frac{-q_2}{r_2}\right)n + \left(\frac{1 + q_1q_2}{r_2}\right)m = 1\\
+    &u(\lambda) = \frac{-q_2}{r_2} = 20\lambda + \frac{61}{3}\\
+    &v(\lambda) = \frac{1 + q_1q_2}{r_2} =\frac{-40}{3}\lambda^2+2\lambda+1
+\end{align*}
+Retransforming back from $\lambda$ to $s$, we get
+\begin{align*}
+    &N(s) = \frac{s-1}{(s+1)^3}\\
+    &M(s) = \frac{(s+2)(s-2)}{(s+1)^2}\\
+    &U(s) = \frac{61s+121}{3(s+1)}\\
+    &V(s) = \frac{3s^2+12s-31}{3(s+1)^2}
+\end{align*}
+$N(s)$ and $M(s)$ have no common RHP zeros, which is a necessary condition for coprime factorization. Additionally, $U(s)$ and $V(s)$ are semi-proper and stable, and it can be shown that for the obtained coprime transfer functions, the \emph{Bezout's Identity} is satisfied.\\
+\subsection{Youla controller design}
+For $G(s)$, which is unstable and assumed to be in a negative feedback system, all internally stabilizing controllers are given by:\\
+\begin{align*}
+    K(s) = (V-QN)^{-1}(U+QM)
+\end{align*}
+where $Q(s) \in \mathcal{RH}_{\infty}$ and
+\begin{equation}
+    V(s=\infty)-Q(s=\infty)N(s=\infty) \neq 0
+\label{eq:y}
+\end{equation}
+Let $Q(s) = \frac{1}{s+3}$
+Now,
+\begin{align*}
+V(s=\infty) &= \lim_{s\to\infty}\: \frac{31-12s-3s^2}{3(s+1)^2} = -1\\
+N(s=\infty) &= \lim_{s\to\infty}\: \frac{s-1}{(s+1)^3} = 0
+\end{align*}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q223}
+    \end{tikzpicture}}
+    \caption{Response of closed-loop transfer functions a decaying input, $u = 2e^{-t}$.}
+    \label{fig:stres}
+\end{figure}
+Thus, equation~\eqref{eq:y} never vanishes, irrespective of the value of $Q(s=\infty)$.
+We can represent the closed-loop transfer functions like $S(s)$ and $T(s)$ as affine functions of $Q(s)$. Assuming negative feedback,
+\begin{align*}
+    S(s) = \frac{1}{1 + GK} = M(V-QN)\\
+    T(s) = \frac{GK}{1+GK} = N(U+QM)
+\end{align*}
+As seen in Figure \ref{fig:stres}, stable closed-loop transfer functions are obtained for the designed controller. Hence, it is possible to design a Youla controller to internally stabilise the system.

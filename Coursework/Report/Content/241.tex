@@ -1,0 +1,51 @@
+\section{HIMAT example system analysis}
+The transfer function matrix reduced 4th-order system can be obtained from the reduced state-space matrices using Equation ~\eqref{ss2tf}.
+\begin{align*}
+    \bm{G}(s) =
+    \begin{bmatrix}
+        \frac{0.3384 s^3 - 26.13 s^2 - 0.3659 s + 0.01678}{s^4 + 3.068 s^3 - 3.362 s^2 - 0.5748 s + 0.7598} & \frac{-0.3349 s^3 + 18.21 s^2 + 0.3487 s - 0.05939}{s^4 + 3.068 s^3 - 3.362 s^2 - 0.5748 s + 0.7598}\\
+        \frac{0.4755 s^3 - 25.3 s^2 - 51.36 s - 1.387}{s^4 + 3.068 s^3 - 3.362 s^2 - 0.5748 s + 0.7598} & \frac{-0.3107 s^3 + 17.81 s^2 + 35.49 s + 1.027}{s^4 + 3.068 s^3 - 3.362 s^2 - 0.5748 s + 0.7598}   
+    \end{bmatrix}
+\end{align*}
+All elements of $\mathbf{G}(s)$ have the same denominator polynomial, and the common denominator form can be written as,
+\begin{align*}
+    &\bm{G}(s) = \frac{1}{d(s)}\bm{N}(s)\\
+    &d(s) = s^4 + 3.068 s^3 - 3.362 s^2 - 0.5748 s + 0.7598\\
+    &\bm{N} = 
+    \begin{bmatrix}
+        0.3384 s^3 - 26.13 s^2 - 0.3659 s + 0.01678 & -0.3349 s^3 + 18.21 s^2 + 0.3487 s - 0.05939\\
+        0.4755 s^3 - 25.3 s^2 - 51.36 s - 1.387 & -0.3107 s^3 + 17.81 s^2 + 35.49 s + 1.027   
+    \end{bmatrix}
+\end{align*}
+The smith form of the transfer function matrix is obtained using the \emph{smithForm} inbuilt function in MATLAB.
+\begin{align*}
+    &\bm{S}(s) =
+    \begin{bmatrix}
+        \gamma^S_1(s)&0\\
+        0&\gamma^S_2(s)
+    \end{bmatrix}\\
+    &\gamma^S_1(s) = 1\\
+    &\gamma^S_2(s) = (s+0.0272)(s+0.4742)(s-0.5937)(s-0.6951)(s+3.383)(s-58.2846)
+\end{align*}
+The Smith-McMillan form can be obtained as,
+\begin{align*}
+    &\bm{M}(s) = \frac{1}{d(s)}\bm{S}(s)\\
+    &\bm{M}(s) =
+    \begin{bmatrix}
+        \frac{\gamma_1(s)}{\beta_1(s)}\&0\\
+        0&\frac{\gamma_2(s)}{\beta_2(s)}
+    \end{bmatrix}\\
+    &\gamma_1(s) = 1, \beta_1(s) = d(s)\\
+    &\gamma_2(s) = (s+0.0272)(s-58.2846), \beta_2(s) = 1
+\end{align*}
+The combined roots of $\gamma_1(s)$ and $\gamma_2(s)$ will give the transmission zeros of the system. Thus, it can be seen that $z = 58.2846$ is the added RHP zero in the reduced system. It can be seen from Figure \ref{fig:ssvFullRed} that the condition number of the reduced-order model becomes higher than that of the full-order model, especially for $\omega \in [0.16,1]$ rad/s. Additionally, the small value of the lower singular values in this frequency range (given that the condition number is high in this range) implies problems in control design \cite{Sko05}.
+
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q241a}
+    \end{tikzpicture}}
+    \caption{Singular Value plots of the full-order and reduced-order model.}
+    \label{fig:ssvFullRed}
+\end{figure}

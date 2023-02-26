@@ -1,0 +1,46 @@
+\section{Proof of equivalence}
+Average power of any random process $x(t)$,
+\begin{align*}
+    P_X = E\Biggl\{\lim_{T\to\infty} \frac{1}{2T}\:\int_{-T}^T\: x(t)^2\:dt\Biggr\}
+\end{align*}
+For a stochastic stationary process,
+\begin{align*}
+P_X &= \lim_{T\to\infty} \frac{1}{2T}\:\int_{-T}^T\: E\biggl\{x(t)^2\biggr\}dt \\
+	&= R_X(\tau=0) 
+\end{align*}
+where, $R(.)$ is the \emph{Auto-Correlation functon}, and $\mathbf{R}_X = E\biggl\{\bm{X}(t+\tau)\bm{X}(t)^H\biggr\}$, if $\bm{X}(t)$ is a random vector.
+
+Average power of $\bm{z}(t)$:
+\begin{equation}
+P_{z} = E\Biggl\{\lim_{T\to\infty} \frac{1}{2T}\:\int_{-T}^T\: \bm{z}(t)^T\: \bm{z}(t)dt\Biggr\} 
+\end{equation}
+which can be written as,
+\begin{align*}
+    P_{z}&= \lim_{T\to\infty} \frac{1}{2T}\:\int_{-T}^T\: E\biggl\{\|\bm{z}(t)\|^2\biggr\}dt \\
+	&= \Tr\bm{R}_z(\tau=0)\\
+    &= \Tr E\biggl\{\bm{z}(t)\bm{z}(t)^H\biggr\}
+\end{align*}
+\textbf{Hence, the first statement is proved.}
+
+The \emph{spectral power density} represents the intensity of the signal, and is obtained when a Forward Fourier Transform is carried out on the Auto-correlation Function i.e. Spectral Power Density is the Auto-Correlation Function in the frequency domain. Thus,
+\begin{align*}
+    \bm{R}_X &= \frac{1}{2\pi}\: \int_{-\infty}^{\infty}\: \bm{S}_X(j\omega)\: e^{j\omega\tau}\:d\omega \\
+    P_X &= \Tr\bm{R}_X(\tau=0)\\
+    &= \frac{1}{2\pi}\: \int_{-\infty}^{\infty}\: \Tr(\bm{S}_X(j\omega))\: d\omega
+\end{align*}
+For a stable LTI system, if $\bm{z} = \bm{Fw}$ , then
+\begin{align*}
+    \bm{S}_{z}=\bm{F}\bm{S}_w\bm{F}^H
+\end{align*}
+and
+\begin{equation}
+    P_z = \frac{1}{2\pi}\: \int_{-\infty}^{\infty}\: \Tr[\bm{F}(j\omega)\bm{S}_w(j\omega)\bm{F}(j\omega)^H]\: d\omega
+    \label{eq:trF}
+\end{equation}
+
+Now, let $\bm{w}(t)$ be white noise of unit intensity, thus $\bm{S}_w(j\omega)=\bm{I}$ and $\bm{R}_w(\tau)= \bm{I}\delta(t - \tau)=E\biggl\{\bm{w}(t)\bm{w}(t)^T\biggr\}$, thus equation ~\eqref{eq:trF} can be written as,
+\begin{align*}
+P_z &= \frac{1}{2\pi}\: \int_{-\infty}^{\infty}\: \Tr[\bm{F}(j\omega)\bm{F}(j\omega)^H]\: d\omega \\
+	&= ||\bm{F}(s)||_2^2 \\
+	&= ||\mathcal{F}_l(\bm{P},\bm{K})||^2
+\end{align*}

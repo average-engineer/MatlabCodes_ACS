@@ -1,0 +1,255 @@
+\section{System perturbation}
+\begin{figure}[h]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.6cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thick]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1.6cm, >=stealth']
+      \node[block] (G) {$\mathbf{G}$};
+      \node[block] (K) [below=of G] {$\mathbf{K}$};
+      \node[sum] (s1) [left=of G] {};
+      \node[inout] (r) [left=of s1] {$\mathbf{w_1}$};
+      \node[sum] (s3) [right= of K] {};
+      \node[inout] (n) [right=of s3] {$\mathbf{w_2}$};
+      \draw[connector] (s1) -- node{$\mathbf{e}_1$}(G);
+      \draw[connector] (G) -| node{} (s3);
+      \draw[connector] (n) -- (s3);
+      \draw[connector] (r) -- (s1);
+      \draw[connector] (s3) -- node{$\mathbf{e}_2$} (K);
+      \draw[connector] (K) -| node{} (s1);
+    \end{tikzpicture}
+	  \caption{Feedback Control Loop.}
+    \label{fig:blockDiagram1}
+\end{figure}
+
+The closed-loop transfer functions can be formulated as:
+\begin{align*}
+    \begin{bmatrix}
+    \bm{e}_1 \\
+    \bm{e}_2
+    \end{bmatrix} =
+    \begin{bmatrix}
+    \bm{H}_1 & \bm{H}_2\\
+    \bm{H}_3 & \bm{H}_4
+    \end{bmatrix}
+    \begin{bmatrix}
+    \bm{w}_1 \\
+    \bm{w}_2
+    \end{bmatrix}
+\end{align*}
+For the feedback system, 
+\begin{align*}
+    \bm{e}_1 
+    &= \bm{w}_1 + \bm{K}\bm{e}_2\\
+    &= \bm{w}_1 + \bm{K}\left(\bm{w}_2 + \bm{G}\bm{e}_1\right)\\
+    &= \left(\bm{I} - \bm{KG}\right)^{-1}\bm{w}_1 + \bm{K}\left(\bm{I} - \bm{GK}\right)^{-1}\bm{w}_2
+    \Leftrightarrow \bm{H}_1 = \left(\bm{I} - \bm{KG}\right)^{-1}, 
+    \bm{H}_2 = \bm{K}\left(\bm{I} - \bm{GK}\right)^{-1}
+\end{align*}
+where
+\begin{align*}
+    \bm{G} = 
+    \begin{bmatrix}
+        7&8\\
+        6&7
+    \end{bmatrix}
+    \begin{bmatrix}
+        \frac{1}{s+1}&0\\
+        0&\frac{2}{s+2}
+    \end{bmatrix}
+    \begin{bmatrix}
+        7&8\\
+        6&7
+    \end{bmatrix}^{-1}
+\end{align*}
+Similarly, we can derive $\bm{H}_3$ and $\bm{H}_4$ and our closed loop system becomes 
+\begin{align*}
+    \begin{bmatrix}
+    \bm{e}_1 \\
+    \bm{e}_2
+    \end{bmatrix} =
+    \begin{bmatrix}
+    \left(\bm{I} - \bm{KG}\right)^{-1} & \bm{K}\left(\bm{I} - \bm{GK}\right)^{-1}\\
+    \bm{G}\left(\bm{I} - \bm{KG}\right)^{-1} & \left(\bm{I} - \bm{GK}\right)^{-1}
+    \end{bmatrix}
+    \begin{bmatrix}
+    \bm{w}_1 \\
+    \bm{w}_2
+    \end{bmatrix}
+\end{align*}
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+        \input{images/q213a}
+    \end{tikzpicture}}
+    \caption{Output response of $\bm{H}_1$ to $\bm{u} = \left[2e^{-t}\: 0\right]^T$.}
+    \label{Tf1}
+\end{figure}
+For $\bm{K} = -\bm{I}$, $\bm{KG}$ and $\bm{GK}$ have no RHP Pole-Zero cancellations, thus it is enough to check the stability of one of the closed-loop transfer functions to determine the internal stability of the closed-loop system \cite{Zho99}.
+
+As seen in Figure \ref{Tf1}, $\bm{H}_1$ is stable, thus our closed-loop system will be internally stable as well.
+\subsection{Modelling Dynamic Uncertainty}
+\begin{figure}[h!]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.6cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thick]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1.5cm, >=stealth']
+    % Nodes
+    \node[block] (G) {$\mathbf{G}$};
+    \node[sum, left of = G, node distance = 2.5cm] (s1) {};
+    \node[sum, right of = G, node distance = 2cm] (s2) {};
+    \node[block, left of = s1] (K) {$\mathbf{K}$};
+    \node[block, above of = G] (delA) {$\mathbf{\Delta}_A$};
+    \node[block, right of = delA, node distance = 3.75cm] (delM) {$\mathbf{\Delta}_M$};
+    \node[sum, right of = s2, node distance = 3cm] (s3) {};
+    \node[sum, left of = K] (s4) {};
+    \node[inout, left of = s4] (w2) {$\mathbf{w}_2$};
+    \node[inout, above of = s1] (w1) {$\mathbf{w}_1$};
+    \node[branch, right of = s3] (b1) {};
+    \node[branch, below of = b1] (b2) {};
+    \node[branch, right of = s1, node distance = 1cm] (b3) {};
+    \node[branch, right of = G] (b4) {};
+    \node[branch, right of = s2, node distance = 0.5cm] (b5) {};
+    \node[inout, right of = b1] (y) {$\mathbf{y}$};
+
+    % Connections
+    \draw[connector] (b1) -- (y);
+    \draw[thick] (b1) -- (b2);
+    \draw[connector] (b2) -| (s4);
+    \draw[connector] (w2) -- (s4);
+    \draw[connector] (s4) -- (K);
+    \draw[connector] (K) -- node[] {$\mathbf{u}$} (s1);
+    \draw[connector] (w1) -- (s1);
+    \draw[connector] (s1) -- (b3);
+    \draw[connector] (b3) -- (G);
+    %      \draw[connector] (s3) -| node [yshift=0.3cm] {$\mathbf{y}_m$} (s1);
+    \draw[connector] (b3) |- node[] {$\mathbf{y}_A$} (delA);
+    \draw[connector] (delA) -| node[yshift = 0.2cm, xshift = -0.5cm] {$\mathbf{u}_A$} (b4);
+    \draw[connector] (G) -- (b4);
+    \draw[connector] (b4) -- (s2);
+    \draw[connector] (s2) -- (b5);
+    \draw[connector] (b5) -- (s3);
+    \draw[connector] (b5) |- node[] {$\mathbf{y}_M$} (delM);
+    \draw[connector] (delM) -| node[yshift = 0.2cm, xshift = -0.5cm] {$\mathbf{u}_M$} (s3);
+    \draw[connector] (s3) -- (b1);
+
+    \end{tikzpicture}
+	\caption{Uncertain System with Additive and Output Multiplicative Uncertainty.}
+    \label{fig:blockDiagram2}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.2cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thin]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1.5cm, >=stealth']
+    % Nodes
+      \node[block] (P) {$\bm{P}$};
+      \node[block, below of = P] (K) {$\bm{K}$};
+      \node[inout, left of = P] (w) {$\bm{w}$};
+      \node[inout, right of = P] (z) {$\bm{z}$};
+      \node[block, above of = P] (delta) {$\begin{matrix}
+          \mathbf{\Delta}_A & \mathbf{O}\\
+        \mathbf{O} & \mathbf{\Delta}_M
+      \end{matrix}$};
+      % Connections
+      \draw[->] (K.west) -| ++(-1,1) node [yshift = -0.3cm, xshift = -0.3cm] {$\bm{u}$} |- (P.210);
+      \draw[->] (P.-30) -| ++(1,-1) node [yshift = 0.3cm, xshift = 0.3cm] {$\bm{v}$} |- (K.east);
+      \draw[->] (delta.west) -| ++(-0.63,-1) node [yshift = 0.2cm, xshift = -0.3cm] {$\bm{u}_\Delta$} |- (P.150);
+      \draw[->] (P.30) -| ++(1,1) node [yshift = -0.3cm, xshift = 0.3cm] {$\bm{y}_\Delta$} |- (delta.east);
+      \draw[connector] (P.0) -- (z);
+	 \draw[connector] (w) -- (P.180);
+    \end{tikzpicture}
+	  \caption{Generalized Uncertain Closed Loop Configuration with Dynamic Uncertainty.}
+    \label{fig:blockDiagram3}
+\end{figure}
+The block diagram in Figure \ref{fig:blockDiagram2} can be rearranged in as the $\mathbf{M\Delta}$ structure with the perturbation matrix being set as
+\begin{align*}
+    \mathbf{\Delta} = 
+    \begin{bmatrix}
+        \mathbf{\Delta}_A & \mathbf{O}\\
+        \mathbf{O} & \mathbf{\Delta}_M
+    \end{bmatrix}
+\end{align*}
+Thus, $\mathbf{\Delta}$ is a structured perturbation with a block diagonal structure. 
+The uncertainty and the controller can be taken out of the system, as shown in Figure \ref{fig:blockDiagram3}. The generalized plant $\mathbf{P}$ can then be derived by the procedure as described in Chapter-8 of \cite{Sko05}. Assuming,
+\begin{align*}
+    \bm{z} = \bm{y}\\
+    \bm{w} = 
+    \begin{bmatrix}
+        \bm{w}_1\\
+        \bm{w}_2
+    \end{bmatrix}
+\end{align*}
+Our generalized plant will be,
+\begin{align*}
+    \bm{P} = 
+    \begin{bmatrix}
+        \bm{O} & \bm{O} & \bm{I} & \bm{O} &\bm{I}\\
+        \bm{I} & \bm{O} & \bm{G} & \bm{O} & \bm{G}\\
+        \bm{I} & \bm{I} & \bm{G} & \bm{O} & \bm{G}\\
+        \bm{I} & \bm{I} & \bm{G} & \bm{I} & \bm{G}
+    \end{bmatrix}
+\end{align*}
+
+The nominal closed-loop system can be obtained by closing the lower loop using a lower LFT, $$\bm{N} = \mathcal{F}_l(\bm{P},\bm{K})$$
+
+Since, $\bm{M}$ maps $\bm{u}_\Delta$ to $\bm{y}_\Delta$, thus $$\bm{M} = \bm{N}_{11} =
+\begin{bmatrix}
+    \bm{K}\bm{S} & \bm{K}\bm{S}\\
+    \bm{I} + \bm{T} & \bm{T}
+\end{bmatrix}$$
+where, $\bm{S} = \left(\bm{I} - \bm{GK}\right)^{-1}$ and $\bm{T} = \bm{GK}\left(\bm{I} - \bm{GK}\right)^{-1}$
+
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}
+        \input{images/q213b}
+    \end{tikzpicture}
+    }
+    \caption{Singular Value Plot for the upper singular values of $\mathbf{M}$.}
+    \label{Msing}
+\end{figure}
+
+As seen in Figure \ref{Msing}, the $\mathcal{H}_\infty$ norm of $\mathbf{M}$ lies just below $33$, which can be considered the worst-case perturbation ($\gamma = 33$) for the given structured dynamic uncertainty. The frequency at which this worst-case occurs is $2.8313$ rad/s ($\omega^* = 2.8313$).
+
+\subsection{Modelling Perturbation Matrix}
+Let
+\begin{align*}
+    \bm{\Delta}_A = \delta_A\bm{I}\\
+    \bm{\Delta}_M = \delta_M\bm{I}
+\end{align*}
+where $\delta_A, \delta_M \in \mathbb{C}$. If both $\delta_A$ and $\delta_A$ are considered to be \emph{all-pass} elements, such that,
+\begin{align*}
+    \delta_A = \gamma\left(\frac{s-2}{s+2}\right),
+    \delta_M = 0.01\left(\frac{s-2}{s+2}\right)
+\end{align*}
+\begin{align*}
+    \Bar{\sigma}\left(\bm{\Delta}(j\omega^*)\right) = \gamma\\ 
+    \|\bm{\Delta}\|_{\infty} = \gamma,
+    \bm{\Delta} \in \mathcal{RH}_{\infty}
+\end{align*}
+    
+\begin{figure}[h!]
+    \centering
+    \scalebox{0.7}{\begin{tikzpicture}
+        \input{images/q213c}
+    \end{tikzpicture}}
+    \caption{Reponse of the first output of the interconnection between $\mathbf{N}$ and $\mathbf{\Delta}$ to step input.}
+    \label{Fres}
+\end{figure}
+
+The interconnection between the closed-loop and $\mathbf{\Delta}$ is given by $$\bm{F} = \mathcal{F}_u(\bm{N},\bm{\Delta})$$ which is unstable, as seen in Figure \ref{Fres}.

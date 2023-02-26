@@ -1,0 +1,78 @@
+\section{System zero and down squaring}
+\begin{comment}
+The state-space matrices of the system in minimal realization are as follows:
+\begin{align*}
+    \bm{A} = 
+    \begin{bmatrix}
+        2&0\\
+        0&-2
+    \end{bmatrix}, \bm{B} = 
+    \begin{bmatrix}
+        1&0\\
+        0&1
+    \end{bmatrix}\\
+    \bm{C} = 
+    \begin{bmatrix}
+        1&-1
+    \end{bmatrix},
+    \bm{D} = 
+    \begin{bmatrix}
+        1&1
+    \end{bmatrix}
+\end{align*}
+\end{comment}
+The system has 2 inputs and 1 output, so a transfer function matrix with 1 row and 2 columns is expected for the plant. We convert the state space realization to the transfer function form using equation ~\eqref{ss2tf}:
+\begin{align*}
+    \bm{G}(s)&=
+    {\LARGE
+    \begin{bmatrix}
+        \frac{s - 1}{s - 2} & \frac{s + 1}{s + 2} \\
+    \end{bmatrix}}
+\end{align*}
+\subsection{Transmission Zeros}
+We can use the \emph{McFarlane and Karcanias} approach as described in Chapter 4 of \cite{Sko05}. To that end, we need to first calculate the characteristic polynomial, the least common divisor of the denominators of all minors of all orders. Since for the plant, only minors of order 1 are possible,
+\begin{align*}
+    &M_1 = \frac{s - 1}{s - 2} \: , \: M_2 = \frac{s + 1}{s + 2} \\
+    &\Phi(s) = (s-2)(s+2)
+\end{align*}
+The zero polynomial then can be obtained by writing the minors of order 1 in such a way that the characteristic polynomial is the denominator and calculating the greatest common divisor of the numerators. Thus,
+\begin{align*}
+    M_1 &= \frac{(s - 1)(s + 2)}{\Phi(s)} \: , \: M_2 = \frac{(s + 1)(s - 2)}{\Phi(s)} 
+\end{align*}
+Since there exists no common factor between the numerators of $M_1$ and $M_2$, we conclude that there is no transmission zero in the system. Additionally, to confirm our result, we can check the \emph{Rosenbrock matrix}, which is a polynomial matrix given by,
+\begin{align*}
+    \bm{P}(s) &=
+    \begin{bmatrix}
+        s\bm{I}-\bm{A} & -\bm{B} \\
+        \bm{C} & \bm{D} \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        s - 2 & 0 & -1 & 0 \\
+        0 & s + 2 & 0 & -1 \\
+        1 & -1 & 1 & 1
+    \end{bmatrix} 
+\end{align*}
+The normal rank of $\mathbf{P}$ is 3. The existence of a transmission zero would make $\mathbf{P}$ rank-deficient at the zero locations. In order to induce rank deficiency, either 2 columns of $\mathbf{P}$ need to be dependent, or 1 row needs to be dependent. It can be seen that all rows are independent irrespective of $s$, while $s=1$ and $s=-1$ lead to only 1 dependent column. Thus, $\mathbf{P}$ is always full rank, and there is no transmission zero in the system. \\
+\subsection{Pre-compensator Design}
+The pre-compensated plant will be given by,
+\begin{align*}
+    \bm{G}_S = \bm{Gk}
+\end{align*}
+where $\mathbf{k}$ is the pre-compensator gain matrix. Let
+\begin{align*}
+    &\:\:\:\:\bm{k} =
+    \begin{bmatrix}
+        k1\\k2
+    \end{bmatrix}\\
+    &G_S(s) = k_1\left(\frac{s-1}{s-2}\right) + k_2\left(\frac{s+1}{s+2}\right)\\
+    &z(s) = k_1(s-1)(s+2) + k_2(s+1)(s-2)\\
+    &\Phi(s) = (s-2)(s+2)
+\end{align*} 
+where $z(s)$ and $\Phi(s)$ are the zero and characteristic polynomials respectively.
+$k_1$ and $k_2$ can be set in such a way that pole-zero cancellations are induced but in the open LHP. To that end, let
+\begin{align*}
+    k_1 = \alpha, \: k_2 = \beta\left(\frac{s+2}{s-2}\right)\\
+    G_S(s) = \frac{(\alpha + \beta)\:s + (\beta-\alpha)}{s-2} 
+\end{align*}
+For $\beta>\alpha>0$, the system zero is in the open LHP. Additionally, the above design ensures there is no RHP Pole-Zero cancellations.
