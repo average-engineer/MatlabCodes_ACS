@@ -1,12 +1,17 @@
+%% Author: Ashutosh Mukherjee
+% Co-Author: Raj Khamkar
+% Last Date of modification: 26.02.2023
 %% Settings
 clearvars
 close all
 clc
 format short
+addpath("matlabtikz")
 s = tf('s');
 freq = logspace(-3,3,500);
 %% Plant
-G = [7,8;6,7]*[1/(s+1),0;0,2/(s+2)]*inv([7,8;6,7]);
+% G = [7,8;6,7]*[1/(s+1),0;0,2/(s+2)]*inv([7,8;6,7]);
+G = [7,8;6,7]*[tf(1,[1 1]),0;0,tf(2,[1 2])]*inv([7,8;6,7]);
 %% Controller
 K = -eye(size(G));
 LI = K*G;
@@ -20,21 +25,6 @@ Tf4 = minreal(inv(eye(size(G)) - (G*K)));
 part = 'b'; % a or b
 switch part
     case 'a'
-        %% Pole Zero Map
-        figure
-        subplot(2,2,1)
-        pzmap(Tf1)
-        grid on
-        subplot(2,2,2)
-        pzmap(Tf2)
-        grid on
-        subplot(2,2,3)
-        pzmap(Tf3)
-        grid on
-        subplot(2,2,4)
-        pzmap(Tf4)
-        grid on
-        poles = pole(Tf1)
         %% Arbritary Input
         t = linspace(0,10,100);
         u1 = 2.*exp(-t);
@@ -59,9 +49,15 @@ switch part
         title('Tf4')
 
         figure
-        lsimplot(G,u,t)
+        x = lsim(Tf1,u,t);
+        plot(t,x(:,1),'color','r','linewidth',2,'DisplayName','y1')
+        hold on
+        plot(t,x(:,2),'color','k','linewidth',2,'DisplayName','y2')
+        legend
+        xlabel('Time(s)')
+        ylabel('Amplitude')
         grid on
-        title('Plant')
+        matlab2tikz();
         
         freq = logspace(-3,2,100);
         for kk = 1:length(freq)
@@ -104,13 +100,14 @@ switch part
         [HInfNorm,peakFreq] = hinfnorm(M);
 
         figure
-        semilogx(freq,MFR,'-*','DisplayName','Dynamic Uncertainty M Upper Singular Value')
+        semilogx(freq,MFR,'--','color','k','linewidth',2,'DisplayName','Dynamic Uncertainty M Upper Singular Value')
         hold on
         grid on
         xlabel('Frequency (rad/s)')
-        title('Singular Value Plot')
-        legend 
+        %title('Singular Value Plot')
+        %legend 
         fprintf(append("H-Inf Norm of M is ",num2str(HInfNorm)," and occurs at ",num2str(peakFreq), " rad/s\n"));
+        %matlab2tikz();
 
         gamma = round(HInfNorm);
         %% Perturbation Matrix
@@ -123,7 +120,7 @@ switch part
         end
 
         figure
-        semilogx(freq,PertFR,'-*','DisplayName','Perturbation Matrix Upper Singular Value')
+        semilogx(freq,PertFR,'-*','linewidth',2,'DisplayName','Perturbation Matrix Upper Singular Value')
         hold on
         grid on
         xlabel('Frequency (rad/s)')
@@ -135,9 +132,16 @@ switch part
         F = lft(pertM,N);
         % Step Response 
         figure
-        step(F)
+        x = step(F);
+        t = linspace(0,10,size(x,1));
+        plot(t,x(:,1,1),'color','r','linewidth',2,'DisplayName','y1')
+        xlabel('Time(s)')
+        ylabel('Amplitude')
         grid on
-        title('Interconnection of closed-loop and perturbation')      
+        legend
+        matlab2tikz();
+
+        %title('Interconnection of closed-loop and perturbation')      
         
 end
 

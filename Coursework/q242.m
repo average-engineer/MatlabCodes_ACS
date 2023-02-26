@@ -1,8 +1,12 @@
+%% Author: Ashutosh Mukherjee
+% Co-Author: Raj Khamkar
+% Last Date of modification: 26.02.2023
 %% Settings
 clearvars
 close all
 clc
 format long
+addpath("matlabtikz")
 %% Linearized Dynamics
 ag = [-2.2567e-02  -3.6617e+01  -1.8897e+01  -3.2090e+01   3.2509e+00  -7.6257e-01
        9.2572e-05  -1.8997e+00   9.8312e-01  -7.2562e-04  -1.7080e-01  -4.9652e-03
@@ -76,28 +80,6 @@ L = G*K;
 S = Mtilda*(X-Ntilda*Q);
 T = Ntilda*(Mtilda*Q-Y);
 %% Closed Loop Time Response
-% P-Z Map for S and T
-figure
-subplot(2,1,1)
-pzmap(S)
-grid on
-title('S')
-subplot(2,1,2)
-pzmap(T)
-grid on
-title('T')
-
-% Step Response
-figure
-step(S)
-grid on
-title('S')
-
-figure
-step(T)
-grid on
-title('T')
-
 % Arbritary Input
 t = linspace(0,10,100);
 u1 = 2.*exp(-t);
@@ -105,13 +87,26 @@ u2 = zeros(size(t));
 u = [u1;u2];
 figure
 subplot(2,1,1)
-y1 = lsimplot(S,u,t);
+y1 = lsim(S,u,t);
+plot(t,y1(:,1),'color','k','linewidth',2,'DisplayName','S y1')
+hold on
+plot(t,y1(:,2),'color','r','linewidth',2,'DisplayName','S y2')
 grid on
-title('S')
+legend
+xlabel('Time (s)')
+ylabel('Amplitude (-)')
 subplot(2,1,2)
-y2 = lsimplot(T,u,t);
+y2 = lsim(T,u,t);
+plot(t,y2(:,1),'color','k','linewidth',2,'DisplayName','T y1')
+hold on
+plot(t,y2(:,2),'color','r','linewidth',2,'DisplayName','T y2')
 grid on
-title('T')
+legend
+xlabel('Time (s)')
+ylabel('Amplitude (-)')
+grid on
+legend
+matlab2tikz();
 %% Singular Value Plots
 for kk = 1:length(freq)
     [~,eeS,~] = svd(evalfr(S,freq(kk)*1i));
@@ -126,18 +121,19 @@ end
 
 figure
 subplot(2,1,1)
-semilogx(freq,usvS,'--','linewidth',2,'DisplayName','Senstivity TF')
+semilogx(freq,usvS,'--','color','k','linewidth',2,'DisplayName','Senstivity TF')
 hold on
-semilogx(freq,usvT,'linewidth',1,'DisplayName','Complimentary Sensitivity TF')
+semilogx(freq,usvT,'linewidth',2,'DisplayName','Complimentary Sensitivity TF')
 grid on
 xlabel('Frequency (rad/s)')
-title('Upper Singular Values')
+ylabel('Upper Singular Value (-)')
 legend
 subplot(2,1,2)
-semilogx(freq,lsvS,'--','linewidth',2,'DisplayName','Senstivity TF')
+semilogx(freq,lsvS,'--','color','k','linewidth',2,'DisplayName','Senstivity TF')
 hold on
-semilogx(freq,lsvT,'linewidth',1,'DisplayName','Complimentary Sensitivity TF')
+semilogx(freq,lsvT,'linewidth',2,'DisplayName','Complimentary Sensitivity TF')
 grid on
 xlabel('Frequency (rad/s)')
-title('Lower Singular Values')
+ylabel('Lower Singular Value (-)')
 legend
+% matlab2tikz()

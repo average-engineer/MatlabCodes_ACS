@@ -1,0 +1,99 @@
+\section{Spectral decomposition}
+The transfer function of a state-space system $\mathbf{G(s)}$, can be expressed as equation~\eqref{ss2tf},
+\begin{equation}
+ \bm{G(s)} = \bm{C} \: (s\bm{I} - \bm{A})^{-1} \: \bm{B} + \bm{D} \text{.}
+  \label{ss2tf}
+\end{equation}
+where $\bm{A}, \bm{B}, \bm{C}, \bm{D}$  are state-space matrices in minimum realization. Let $\bm{A}$  have no repeated eigenvalues. Then, from \cite{Sko05}, $\bm{A}$ can be written as:
+\begin{equation}
+%\begin{align*}
+\bm{A} = \sum_{i=1}^n \lambda_i \: \bm{t}_i\: \bm{q}_i^H 
+%\end{align*}
+\label{specDec1}
+\end{equation}
+
+According to the Shifting Theorem \cite{Bha12}, the eigenvalues of $s\bm{I}-\bm{A}$ are $s-\lambda$ and the eigenvectors of $s\bm{I}-\bm{A}$ and $\bm{A}$ remain the same. Thus, we can write,
+\begin{align*}
+  s\bm{I} - \bm{A} = \sum_{i=1}^n (s - \lambda_i) \: \bm{t}_i\: \bm{q}_i^H   
+\end{align*}
+    Assuming all eigenvalues are non-zero, the eigenvalues of $\bm{A}^{-1}$ are ${\frac{1}{\lambda_1},\frac{1}{\lambda_2}....,\frac{1}{\lambda_n}}$ and eigenvalues of $(s\bm{I} - \bm{A})^{-1}$ are ${\frac{1}{s-\lambda_1},\frac{1}{s-\lambda_2}....,\frac{1}{s-\lambda_n}}$. Additionally, the same matrix diagonalizes $(s\bm{I} - \bm{A})^{-1}$ and $\bm{A}$ (Appendix A.2.1 in \cite{Sko05}). Thus, $(s\bm{I} - \bm{A})^{-1}$ and $\bm{A}$ will have the same eigenvectors. We can now write,
+\begin{equation}
+(s\bm{I} - \bm{A})^{-1} = \sum_{i=1}^n \frac{\bm{t}_i\: \bm{q}_i^H}{s - \lambda_i} 
+\label{specDec2}
+\end{equation}
+We know the input and output pole vectors as
+\begin{align*}
+\bm{y}_{pi} = \bm{C}\bm{t_i} \\
+\bm{u}_{pi}= \bm{q}_{i}^H\bm{B} 
+\end{align*}
+Thus, equation~\eqref{ss2tf} can be reformulated as,
+\begin{align*}
+\bm{G(s)} &=  \bm{C} \: (s\bm{I} - \bm{A})^{-1} \: \bm{B} + \bm{D} \\
+	&= \bm{C}\: \sum_{i=1}^n \frac{\bm{t}_i\: \bm{q}_i^H}{(s - \lambda_i)}\: \bm{B} + \bm{D} \\
+	&= \sum_{i=1}^n \frac{\bm{C}\: \bm{t}_i\: \bm{q}_i^H\: \bm{B}}{s - \lambda_i} + \bm{D} \\
+    &= \sum_{i=1}^n \frac{\bm{y}_{pi}\: \bm{u}_{pi}^H}{s - \lambda_i} + \bm{D} 
+\end{align*}
+\textbf{Hence, proven.}
+
+\begin{flushleft}
+Testing for a random plant $\bm{A}$ with 3 states: 
+\begin{align*}
+\bm{A} &=
+\begin{bmatrix}
+2 & 1 & -0.5 \\
+1 & -1 & 0 \\
+-0.5 & 0 & -4 
+\end{bmatrix},
+\end{align*}
+in the case of SISO;
+\begin{align*}
+\bm{B} = 
+\begin{bmatrix}
+1 \\
+0 \\
+2 
+\end{bmatrix},
+\bm{C} = 
+ \begin{bmatrix}
+1 & -1 & 2 
+\end{bmatrix},
+\bm{D} = \bm{0}
+\end{align*}
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \input{images/q211SISO}
+    \end{tikzpicture}
+    \caption{SISO Plant Response to a decaying input, $u = 2e^{-t}$.}
+    \label{siso}
+\end{figure}
+and MIMO (TITO);
+\begin{align*}
+\bm{B} = 
+\begin{bmatrix}
+-1 & 0 \\
+4 & -2 \\
+0 & 1 
+\end{bmatrix},
+\bm{C} = 
+ \begin{bmatrix}
+2 & 0 & 0 \\
+1 & -1 & 2 \\
+\end{bmatrix},
+\bm{D} = 
+ \begin{bmatrix}
+0 & 0 \\
+0 & 0 \\
+\end{bmatrix}
+\end{align*}
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \input{images/q211MIMO}
+    \end{tikzpicture}
+    \caption{MIMO Plant Response to a decaying input, $u = [2e^{-t}\: 0]^T$. }
+    \label{mimo}
+\end{figure}
+
+As both figures \ref{siso} and \ref{mimo} show, the spectral decomposition and the standard \emph{ss2tf()} function in matlab leads to the same plants with the same responses to inputs.
+\end{flushleft}

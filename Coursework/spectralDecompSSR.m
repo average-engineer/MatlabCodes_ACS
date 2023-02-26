@@ -1,3 +1,5 @@
+%% Author: Ashutosh Mukherjee
+% Last Date of modification: 23.01.2023
 function G = spectralDecompSSR(s,A,B,C,D)
 % Computes the spectral decomposition of the State Space Model (A,B,C,D)
 % Input: State Space Coefficient Matrices (A,B,C,D)

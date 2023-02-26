@@ -1,0 +1,94 @@
+\section{Repeated Eigenvalues}
+The \emph{Jordon Decomposition Theorem} states that for any real or complex square matrix $\mathbf{A}$, there exists an invertible $\mathbf{P}$ such that:
+\begin{equation}
+    \bm{A} = \bm{P}\: \bm{J}\: \bm{P}^{-1}
+    \label{jordEq}
+\end{equation}
+where,
+\begin{align*}
+\bm{J}=
+\begin{bmatrix}
+\bm{J}_{k_1}\:(\lambda_1) & \dots & \dots & 0 \\
+\vdots & \bm{J}_{k_2}\:(\lambda_2) & \dots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \dots & \bm{J}_{k_m}\:(\lambda_m) 
+\end{bmatrix},
+ \bm{J_{k_i}}(\lambda_i) =
+\begin{bmatrix}
+    \lambda_1 & 1 & 0 & \dots & 0 \\
+    \vdots & \lambda_2 & 1 & \dots & \vdots \\
+    \vdots & \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & 0 & \dots & \lambda_i \\
+\end{bmatrix}
+\end{align*}
+and, $k_i$: Multiplicity of $i^{th}$ eigenvalue and $\mathbf{A}$ has $m$ unique eigenvalues and $\bm{v_i}$: $i^{th}$ generalized eigenvector of $\mathbf{A}$. We know,
+\begin{align*}
+\bm{P} =
+\begin{bmatrix}
+\bm{v}_1 & \bm{v}_2 & \dots & \bm{v}_2 \\ 
+\end{bmatrix} 
+&= 
+\begin{bmatrix}
+\bm{V}_1 & \bm{V}_2 & \dots & \bm{V}_m \\ 
+\end{bmatrix}
+\end{align*}
+where $\dim(\bm{V}_i) = n $x$ k_i$, and
+$\bm{V_i} = 
+\begin{bmatrix}
+\bm{v}_{i_1} & \bm{v}_{i_2} & \dots & \bm{v}_{i_{k_m}} 
+\end{bmatrix}$
+where \{$\bm{v}_{i_1},\bm{v}_{i_1} ... \bm{v}_{i_m}$\} form the eigenspace of $\mathbf{A}$ and $\bm{v}_{i_1}$ is the ordinary eigenvector and the rest are generalized eigenvectors which are dependent on $\bm{v}_{i_1}$. Let $\mathbf{A}$ be limited to symmetric matrices. For symmetric matrices, we know that eigenvectors are always mutually orthogonal, even if eigenvalues are repeated. Thus $\mathbf{P}$ is orthogonal and equation \ref{jordEq} can be written as,
+\begin{align*}
+\bm{A}&=
+\begin{bmatrix}
+\bm{V_1} & \bm{V_2} & \dots & \bm{V_m} \\ 
+\end{bmatrix}
+\begin{bmatrix}
+\bm{J}_{k_1}\:(\lambda_1) & \dots & \dots & 0 \\
+\vdots & \bm{J}_{k_2}\:(\lambda_2) & \dots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \dots & \bm{J}_{k_m}\:(\lambda_m) 
+\end{bmatrix}
+\begin{bmatrix}
+\bm{V_1}^H \\
+\bm{V_2}^H \\
+\vdots \\
+\bm{V_m}^H \\
+\end{bmatrix} \\
+\\
+&=
+\begin{bmatrix}
+\bm{V_1} & \bm{V_2} & \dots & \bm{V_m} \\ 
+\end{bmatrix}
+\begin{bmatrix}
+\bm{J}_{k_1}\:(\lambda_1)\:\bm{V_1}^H \\
+\bm{J}_{k_2}\:(\lambda_2)\:\bm{V_2}^H \\
+\vdots \\
+\bm{J}_{k_m}\:(\lambda_m)\:\bm{V_m}^H \\
+\end{bmatrix}
+\\
+&= \sum_{i=1}^m \bm{V_i}\: \bm{J_{k_i}}\: (\lambda_i)\: \bm{V_i}^H \\
+	&= \sum_{i=1}^m
+	\begin{bmatrix}
+	\bm{v}_{i_1} & \bm{v}_{i_2} & \dots & \bm{v}_{i_{ki}} \\ 
+	\end{bmatrix}
+	\begin{bmatrix}
+	\lambda_i\:\bm{v}_{i_1}^H + \bm{v}_{i_2}^H \\
+	\lambda_i\:\bm{v}_{i_2}^H  + \bm{v}_{i_3}^H  \\
+	\vdots \\
+	\lambda_i\:\bm{v}_{i_{k_i - 1}}^H  + \bm{v}_{i_{k_i}}^H \\
+	\lambda_i\:\bm{v}_{i_{k_i}}^H \\
+	\end{bmatrix} \\
+	&= \sum_{i=1}^m \bm{v}_{i_1}\:\lambda_i\:\bm{v}_{i_1}^H  + \bm{v}_{i_1}\:\bm{v}_{i_2}^H + \bm{v}_{i_2}\:\lambda_i\:\bm{v}_{i_2}^H  + \bm{v}_{i_2}\:\bm{v}_{i_3}^H + \dots + \lambda_i\:\bm{v}_{i_{k_i}}\:\bm{v}_{i_{k_i}}^H \\
+	&= \sum_{i=1}^m \left[\left(\sum_{j=1}^{k_i - 1}\: \bm{v}_{i_j}\:\lambda_i\:\bm{v}_{i_j}^H +  \bm{v}_{i_j}\:\bm{v}_{i_{(j+1)}}^H\right) +  \bm{v}_{i_{k_i}}\:\lambda_i\:\bm{v}_{i_{k_i}}^H \right]
+\end{align*}
+Analogous to equation~\eqref{specDec2}, we can write,
+\begin{align*}
+    s\bm{I}-\bm{A} = \sum_{i=1}^m \left[\left(\sum_{j=1}^{k_i - 1}\: \frac{\bm{v}_{i_j}\:\bm{v}_{i_j}^H}{s-\lambda_i} +  \bm{v}_{i_j}\:\bm{v}_{i_{(j+1)}}^H\right) +  \frac{\bm{v}_{i_{k_i}}\:\bm{v}_{i_{k_i}}^H}{s-\lambda_i} \right]
+\end{align*}
+For a symmetric matrix, the left and right eigenvectors are the same. Thus, we can reformulate equation ~\eqref{ss2tf} as,
+\begin{align*}
+\bm{G(s)} &= \sum_{i=1}^m \left[\left(\sum_{j=1}^{k_i - 1}\: \frac{\bm{C}\bm{t}_{i_j}\:\bm{q}_{i_j}^H\bm{B}}{s-\lambda_i} +  \bm{C}\bm{t}_{i_j}\:\bm{t}_{i_{(j+1)}}^H\bm{B}\right) +  \frac{\bm{C}\bm{t}_{i_{k_i}}\:\bm{q}_{i_{k_i}}^H\bm{B}}{s-\lambda_i} \right] + \bm{D}\\
+&=
+\sum_{i=1}^m \left[\left(\sum_{j=1}^{k_i - 1}\: \frac{\bm{y}_{p_{i_j}}\:\bm{u}_{p_{i_j}}^H}{s-\lambda_i} +  \bm{y}_{p_{i_j}}\:\bm{u}_{p_{i_{(j+1)}}}^H\right) +  \frac{\bm{y}_{p_{i_{k_i}}}\:\bm{u}_{p_{i_{k_i}}}^H}{s-\lambda_i} \right] + \bm{D}\\
+\end{align*}

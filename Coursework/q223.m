@@ -1,8 +1,12 @@
+%% Author: Ashutosh Mukherjee
+% Co-Author: Raj Khamkar
+% Last Date of modification: 26.02.2023
 %% Settings
 clearvars
 close all
 clc
 format short
+addpath("matlabtikz")
 %% Plant
 G = tf([1 -1],[1 1 -4 -4]);
 %% Verification of Bezout Identity
@@ -19,21 +23,51 @@ Tf1 = minreal(inv(eye(size(G)) + (K*G)));
 Tf2 = minreal(K*inv(eye(size(G)) + (G*K)));
 Tf3 = minreal(G*Tf1);
 Tf4 = minreal(inv(eye(size(G)) + (G*K)));
-%% Step Response
+%% Senstivity and Complimentary Sensitivity Transfer Function
+S = M*(V-Q*N);
+T = N*(U+Q*M);
+%% Closed loop response
+t = linspace(0,20,100);
+u = 2.*exp(-t);
 figure
 subplot(2,2,1)
-step(Tf1)
-title('Tf1')
+x = lsim(Tf1,u,t);
+plot(t,x,'linewidth',2,'DisplayName','TF1')
+xlabel('Time(s)')
+ylabel('Amplitude(-)')
+legend
 grid on
 subplot(2,2,2)
-step(Tf2)
-title('Tf2')
+x = lsim(Tf2,u,t);
+plot(t,x,'linewidth',2,'DisplayName','TF2')
+xlabel('Time(s)')
+ylabel('Amplitude(-)')
+legend
 grid on
 subplot(2,2,3)
-step(Tf3)
-title('Tf3')
+x = lsim(Tf3,u,t);
+plot(t,x,'linewidth',2,'DisplayName','TF3')
+xlabel('Time(s)')
+ylabel('Amplitude(-)')
+legend
 grid on
 subplot(2,2,4)
-step(Tf4)
-title('Tf4')
+x = lsim(Tf4,u,t);
+plot(t,x,'linewidth',2,'DisplayName','TF4')
+xlabel('Time(s)')
+ylabel('Amplitude(-)')
+legend
 grid on
+matlab2tikz();
+
+figure
+xs = lsim(S,u,t);
+plot(t,xs,'Color','r','linewidth',2,'DisplayName','Sensitivity Transfer Function')
+hold on
+xt = lsim(T,u,t);
+plot(t,xt,'Color','k','linewidth',2,'DisplayName','Complimentary Sensitivity Transfer Function')
+grid on
+xlabel('Time(s)')
+ylabel('Amplitude(-)')
+legend
+%matlab2tikz();

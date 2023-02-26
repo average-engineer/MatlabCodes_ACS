@@ -1,0 +1,131 @@
+\section{System perturbation}
+\begin{figure}[htb]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.6cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thick]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1.6cm, >=stealth']
+      \node[block] (G) {$\mathbf{G}$};
+      \node[block] (K) [below=of G] {$\mathbf{K}$};
+      \node[sum] (s1) [left=of G] {};
+      \node[inout] (r) [left=of s1] {$\mathbf{w_1}$};
+      \node[sum] (s3) [right= of K] {};
+      \node[inout] (n) [right=of s3] {$\mathbf{w_2}$};
+      \draw[connector] (s1) -- node{$\mathbf{e}_1$}(G);
+      \draw[connector] (G) -| node{} (s3);
+      \draw[connector] (n) -- (s3);
+      \draw[connector] (r) -- (s1);
+      \draw[connector] (s3) -- node{$\mathbf{e}_2$} (K);
+      \draw[connector] (K) -| node{} (s1);
+    \end{tikzpicture}
+	  \caption{Feedback Control Loop.}
+    \label{fig:blockDiagram1}
+\end{figure}
+
+The closed-loop transfer functions can be formulated as:
+\begin{align*}
+    \begin{bmatrix}
+    \bm{e}_1 \\
+    \bm{e}_2
+    \end{bmatrix} =
+    \begin{bmatrix}
+    \bm{H}_1 & \bm{H}_2\\
+    \bm{H}_3 & \bm{H}_4
+    \end{bmatrix}
+    \begin{bmatrix}
+    \bm{w}_1 \\
+    \bm{w}_2
+    \end{bmatrix}
+\end{align*}
+For the feedback system, 
+\begin{align*}
+    \bm{e}_1 
+    &= \bm{w}_1 + \bm{K}\bm{e}_2\\
+    &= \bm{w}_1 + \bm{K}\left(\bm{w}_2 + \bm{G}\bm{e}_1\right)\\
+    &= \left(\bm{I} - \bm{KG}\right)^{-1}\bm{w}_1 + \bm{K}\left(\bm{I} - \bm{GK}\right)^{-1}\bm{w}_2
+    \Leftrightarrow \bm{H}_1 = \left(\bm{I} - \bm{KG}\right)^{-1}, 
+    \bm{H}_2 = \bm{K}\left(\bm{I} - \bm{GK}\right)^{-1}
+\end{align*}
+where
+\begin{align*}
+    \bm{G} = 
+    \begin{bmatrix}
+        7&8\\
+        6&7
+    \end{bmatrix}
+    \begin{bmatrix}
+        \frac{1}{s+1}&0\\
+        0&\frac{2}{s+2}
+    \end{bmatrix}
+    \begin{bmatrix}
+        7&8\\
+        6&7
+    \end{bmatrix}^{-1}
+\end{align*}
+Similarly, we can derive $\bm{H}_3$ and $\bm{H}_4$ and our closed loop system becomes 
+\begin{align*}
+    \begin{bmatrix}
+    \bm{e}_1 \\
+    \bm{e}_2
+    \end{bmatrix} =
+    \begin{bmatrix}
+    \left(\bm{I} - \bm{KG}\right)^{-1} & \bm{K}\left(\bm{I} - \bm{GK}\right)^{-1}\\
+    \bm{G}\left(\bm{I} - \bm{KG}\right)^{-1} & \left(\bm{I} - \bm{GK}\right)^{-1}
+    \end{bmatrix}
+    \begin{bmatrix}
+    \bm{w}_1 \\
+    \bm{w}_2
+    \end{bmatrix}
+\end{align*}
+For $\bm{K} = -\bm{I}$, $\bm{KG}$ and $\bm{GK}$ have no RHP Pole-Zero cancellations, thus it is enough to check the stability of one of the closed-loop transfer functions to determine the internal stability of the closed-loop system \cite{Zho99}.
+\begin{figure}[htb]
+    \centering
+    \begin{tikzpicture}
+        \input{images/q213a}
+    \end{tikzpicture}
+    \caption{Output response of $\bm{H}_1$ to $\bm{u} = \left[2e^{-t}\: 0\right]^T$.}
+    \label{Tf1}
+\end{figure}
+As seen in Figure \ref{Tf1}, $\bm{H}_1$ is stable, thus our closed-loop system will be internally stable as well.
+
+\begin{figure}[htb]
+  \centering
+  \tikzstyle{block}     = [draw, rectangle, minimum height=1cm, minimum width=1.6cm]
+    \tikzstyle{branch}    = [circle, inner sep=0pt, minimum size=1mm, fill=black, draw=black]
+    \tikzstyle{connector} = [->, thick]
+    \tikzstyle{input} = [coordinate]
+    \tikzstyle{output} = [coordinate]
+    \tikzstyle{dummy}     = [inner sep=0pt, minimum size=0pt]
+    \tikzstyle{inout}     = []
+    \tikzstyle{sum}       = [circle, inner sep=0pt, minimum size=2mm, draw=black, thick]
+    \begin{tikzpicture}[auto, node distance=1.5cm, >=stealth']
+\node[block] (G) {$\mathbf{G}$};
+\node[sum, left of = G] (s1) {};
+\node[sum, right of = G] (s2) {};
+\node[block, left of = s1] (K) {$\mathbf{K}$};
+\node[block, above of = G] (delA) {$\mathbf{\Delta}_A$};
+\node[block, right of = delA, node distance = 3cm] (delM) {$\mathbf{\Delta}_M$};
+\node[sum, right of = s2, node distance = 3cm] (s3) {};
+\node[sum, left of = K] (s4) {};
+\node[input, left of = s4] (w2) {$\mathbf{w}_2$};
+\node[input, above of = s1] (w1) {$\mathbf{w}_1$};
+\node[output, right of = s3] (op) {}
+\draw [connector] (s3) -- node [name=y] {$Y$}(op);
+\draw[connector] (y) |- (s4);
+\begin{comment}
+\draw[connector] (G) -| node{} (s3);
+\draw[connector] (n) -- (s3);
+\draw[connector] (r) -- (s1);
+\draw[connector] (s3) -- node{$\mathbf{e}_2$} (K);
+\draw[connector] (K) -| node{} (s1);
+\end{comment}
+\end{tikzpicture}
+	  \caption{Feedback Control Loop.}
+    \label{fig:blockDiagram1}
+\end{figure}
+
+
+
